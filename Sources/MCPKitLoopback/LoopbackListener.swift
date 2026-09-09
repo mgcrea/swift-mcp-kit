@@ -38,6 +38,9 @@ public final class LoopbackListener: @unchecked Sendable {
   private let server: MCPServer
   private let gate: RequestGate
   private let allowWrites: @Sendable () -> Bool
+  /// One line per request, composed here because this is the only layer that knows both what
+  /// happened and who the token said asked.
+  private let audit: AuditSink?
   private let budget = ConnectionBudget(limit: 64)
 
   private let lock = NSLock()
@@ -50,11 +53,13 @@ public final class LoopbackListener: @unchecked Sendable {
   private static let ioTimeout = timeval(tv_sec: 10, tv_usec: 0)
 
   public init(
-    server: MCPServer, gate: RequestGate, allowWrites: @escaping @Sendable () -> Bool
+    server: MCPServer, gate: RequestGate, allowWrites: @escaping @Sendable () -> Bool,
+    audit: AuditSink? = nil
   ) {
     self.server = server
     self.gate = gate
     self.allowWrites = allowWrites
+    self.audit = audit
   }
 
   public var state: State {
@@ -211,12 +216,43 @@ public final class LoopbackListener: @unchecked Sendable {
   // MARK: - Answering
 
   private func respond(head: HTTPRequestHead, body: Data) -> HTTPResponse {
-    if let refusal = gate.check(head) { return refusal }
+    let started = DispatchTime.now()
+    func record(
+      _ outcome: AuditOutcome, method: String? = nil, name: String? = nil,
+      client: String? = nil, declared: String? = nil, version: MCPVersion? = nil
+    ) {
+      guard let audit else { return }
+      let elapsed = DispatchTime.now().uptimeNanoseconds &- started.uptimeNanoseconds
+      audit(
+        AuditEntry(
+          method: method, name: name, client: client, declaredClient: declared,
+          protocolVersion: version, outcome: outcome,
+          durationMs: Int(elapsed / 1_000_000)))
+    }
+
+    let accepted: RequestGate.Accepted
+    switch gate.check(head) {
+    case .success(let allowed): accepted = allowed
+    case .failure(let refusal):
+      record(.refused(httpStatus: refusal.status))
+      return refusal
+    }
+
+    if accepted.route == .health {
+      record(.served, method: "GET \(gate.healthPath)", client: accepted.client)
+      return health()
+    }
 
     let request: MCPRequest
     switch Dialect.parse(headers: head.headers, body: body) {
     case .success(let parsed): request = parsed
-    case .failure(let fault): return .fault(fault)
+    case .failure(let fault):
+      // The method is taken from the header rather than the body: the body is what failed to
+      // parse, and a header the gate already validated is the more trustworthy of the two.
+      record(
+        .protocolError(fault.code), method: head.headers.trimmed("mcp-method"),
+        client: accepted.client)
+      return .fault(fault)
     }
 
     // Hop onto the cooperative pool for the handler and block *this* thread until it is
@@ -233,9 +269,15 @@ public final class LoopbackListener: @unchecked Sendable {
     semaphore.wait()
 
     guard let response = box.value else {
+      record(
+        .protocolError(.internalError), method: request.method, name: request.addressedName,
+        client: accepted.client, declared: request.clientInfo?.name, version: request.version)
       return .fault(
         MCPFault(httpStatus: 500, code: .internalError, message: "The handler returned nothing."))
     }
+    record(
+      response.outcome, method: request.method, name: request.addressedName,
+      client: accepted.client, declared: request.clientInfo?.name, version: request.version)
     guard let payload = response.body else {
       // A notification: 202 and no body, per the transport.
       return HTTPResponse(status: 202)
@@ -244,6 +286,23 @@ public final class LoopbackListener: @unchecked Sendable {
       status: response.httpStatus,
       headers: ["Content-Type": "application/json"],
       body: MCPJSON.data(payload))
+  }
+
+  /// A liveness answer that costs no JSON-RPC round trip.
+  ///
+  /// Says which revisions this build speaks, which is the one thing a caller cannot find out
+  /// from a failed request: an unsupported-version error names the supported list, but only
+  /// once you have already guessed wrong.
+  private func health() -> HTTPResponse {
+    let payload: JSONValue = [
+      "ok": true,
+      "server": .string(server.info.name),
+      "version": .string(server.info.version),
+      "protocolVersions": .array(MCPVersion.supported.map { .string($0.rawValue) }),
+      "writesAllowed": .bool(allowWrites()),
+    ]
+    return HTTPResponse(
+      status: 200, headers: ["Content-Type": "application/json"], body: MCPJSON.data(payload))
   }
 
   private func write(_ fd: Int32, _ data: Data) {

@@ -16,7 +16,11 @@ public struct HTTPRequestHead: Sendable, Hashable {
 }
 
 /// A response to write back.
-public struct HTTPResponse: Sendable, Hashable {
+///
+/// `Error` so a refusal can travel as the failure half of a `Result` — a refusal *is* the
+/// answer in that case, and wrapping it in a second type to satisfy the protocol would add
+/// a layer that only ever holds one thing.
+public struct HTTPResponse: Sendable, Hashable, Error {
   public let status: Int
   public let headers: [String: String]
   public let body: Data

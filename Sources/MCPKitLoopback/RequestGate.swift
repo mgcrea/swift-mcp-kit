@@ -38,30 +38,60 @@ public func constantTimeEquals(_ lhs: String, _ rhs: String) -> Bool {
 ///    visits resolves a name it controls to 127.0.0.1 and then speaks to this server.
 /// 2. `Origin`, *if present*, must be loopback. Absent is allowed, because real MCP clients
 ///    are not browsers and send none; requiring it would refuse every genuine caller.
-/// 3. Only then, the token.
+/// 3. The token.
+/// 4. Only then, the route.
 ///
 /// Reversing 1 and 3 would make the refusal a measurement: a rebinding probe would learn
 /// from the status code whether the token it guessed was valid.
+///
+/// Routing comes **after** the token for the same reason one step down. An unauthenticated
+/// caller that could tell `404` from `405` from `401` would be able to map the endpoints
+/// before presenting a credential; with the token first, everything it can reach is one
+/// sentence.
 public struct RequestGate: Sendable {
 
   let port: Int
   let endpoint: String
+  let healthPath: String
   let verify: @Sendable (String?) -> TokenVerdict
 
   public init(
-    port: Int, endpoint: String = "/mcp", verify: @escaping @Sendable (String?) -> TokenVerdict
+    port: Int, endpoint: String = "/mcp", healthPath: String = "/health",
+    verify: @escaping @Sendable (String?) -> TokenVerdict
   ) {
     self.port = port
     self.endpoint = endpoint
+    self.healthPath = healthPath
     self.verify = verify
   }
 
-  /// The refusal, or `nil` when the request may proceed.
-  public func check(_ head: HTTPRequestHead) -> HTTPResponse? {
-    if let refusal = checkHost(head) { return refusal }
-    if let refusal = checkOrigin(head) { return refusal }
-    if let refusal = checkRoute(head) { return refusal }
-    return checkToken(head)
+  /// Which route a request that passed the gate is asking for.
+  public enum Route: Sendable, Hashable {
+    case rpc
+    case health
+  }
+
+  /// A request that got through, and who the token said sent it.
+  ///
+  /// The client travels in the return value rather than on the gate, because one gate serves
+  /// every connection concurrently — a field holding "the last accepted client" would race
+  /// between two editors and attribute one's calls to the other, which is worse than having
+  /// no audit at all.
+  public struct Accepted: Sendable, Hashable {
+    public let route: Route
+    public let client: String?
+  }
+
+  /// The route and caller, or the refusal.
+  public func check(_ head: HTTPRequestHead) -> Result<Accepted, HTTPResponse> {
+    if let refusal = checkHost(head) { return .failure(refusal) }
+    if let refusal = checkOrigin(head) { return .failure(refusal) }
+    let client: String?
+    switch checkToken(head) {
+    case .failure(let refusal): return .failure(refusal)
+    case .success(let named): client = named
+    }
+    return checkRoute(head).map { Accepted(route: $0, client: client) }
   }
 
   // MARK: - Steps
@@ -92,28 +122,43 @@ public struct RequestGate: Sendable {
     return nil
   }
 
-  private func checkRoute(_ head: HTTPRequestHead) -> HTTPResponse? {
+  private func checkRoute(_ head: HTTPRequestHead) -> Result<Route, HTTPResponse> {
+    // A liveness probe that does not need a JSON-RPC round trip to answer "is it up, what
+    // does it speak". Behind the token like everything else: it is cheap to answer and
+    // there is no reason to tell an unauthenticated local process the app's version.
+    if head.target == healthPath {
+      guard head.method == "GET" else {
+        return .failure(
+          .fault(
+            MCPFault(
+              httpStatus: 405, code: .invalidRequest,
+              message: "The health endpoint accepts GET only."), extra: ["Allow": "GET"]))
+      }
+      return .success(.health)
+    }
     guard head.target == endpoint else {
-      return .fault(
-        MCPFault(
-          httpStatus: 404, code: .methodNotFound,
-          message: "No such path. The MCP endpoint is '\(endpoint)'."))
+      return .failure(
+        .fault(
+          MCPFault(
+            httpStatus: 404, code: .methodNotFound,
+            message: "No such path. The MCP endpoint is '\(endpoint)'.")))
     }
     guard head.method == "POST" else {
       // 405, never 404. The stateless revision removed the GET stream and the DELETE that
       // ended a session, and a 404 here would send an older client hunting for the
       // deprecated HTTP+SSE endpoint instead of telling it the truth.
-      return .fault(
-        MCPFault(
-          httpStatus: 405, code: .invalidRequest,
-          message: "The MCP endpoint accepts POST only. Sessions and the GET stream were "
-            + "removed in 2026-07-28."),
-        extra: ["Allow": "POST"])
+      return .failure(
+        .fault(
+          MCPFault(
+            httpStatus: 405, code: .invalidRequest,
+            message: "The MCP endpoint accepts POST only. Sessions and the GET stream were "
+              + "removed in 2026-07-28."),
+          extra: ["Allow": "POST"]))
     }
-    return nil
+    return .success(.rpc)
   }
 
-  private func checkToken(_ head: HTTPRequestHead) -> HTTPResponse? {
+  private func checkToken(_ head: HTTPRequestHead) -> Result<String?, HTTPResponse> {
     let presented = head.headers.trimmed("authorization").flatMap { header -> String? in
       let parts = header.split(separator: " ", maxSplits: 1)
       guard parts.count == 2, parts[0].lowercased() == "bearer" else { return nil }
@@ -121,21 +166,23 @@ public struct RequestGate: Sendable {
     }
 
     switch verify(presented) {
-    case .accepted:
-      return nil
+    case .accepted(let named):
+      return .success(named)
     case .unavailable:
-      return .fault(
-        MCPFault(
-          httpStatus: 503, code: .internalError,
-          message: "The credential store cannot be read right now. Unlock the keychain and "
-            + "try again."),
-        extra: ["Retry-After": "5"])
+      return .failure(
+        .fault(
+          MCPFault(
+            httpStatus: 503, code: .internalError,
+            message: "The credential store cannot be read right now. Unlock the keychain and "
+              + "try again."),
+          extra: ["Retry-After": "5"]))
     case .rejected:
       // One sentence for "no token" and "wrong token" alike. An error that distinguished
       // them would confirm to a caller that a guess was well-formed, which is an oracle.
-      return .fault(
-        MCPFault(httpStatus: 401, code: .invalidRequest, message: "Unauthorized."),
-        extra: ["WWW-Authenticate": "Bearer"])
+      return .failure(
+        .fault(
+          MCPFault(httpStatus: 401, code: .invalidRequest, message: "Unauthorized."),
+          extra: ["WWW-Authenticate": "Bearer"]))
     }
   }
 
