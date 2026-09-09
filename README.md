@@ -77,6 +77,8 @@ Checks run in this order, and the order is the property rather than the tidiness
 2. **`Origin`, if present, must be loopback.** Absent is allowed — real MCP clients are not
    browsers and send none, so requiring it would refuse every genuine caller.
 3. **Then the bearer token**, compared in constant time.
+4. **Only then the route.** An unauthenticated caller that could tell `404` from `405` would
+   be able to map the endpoints before presenting a credential.
 
 Reversing 1 and 3 would turn the refusal into a measurement: a rebinding probe would learn
 from the status code whether the token it guessed was valid.
@@ -89,6 +91,28 @@ Three further decisions worth knowing about:
   them would confirm a guess was well-formed, which is halfway to right.
 - **`GET` and `DELETE` on the endpoint answer `405`, not `404`.** A `404` sends an older
   client hunting for the deprecated HTTP+SSE endpoint instead of telling it the truth.
+
+## `GET /health` and the audit line
+
+A liveness route answering `{ok, server, version, protocolVersions, writesAllowed}` — the
+protocol versions a build speaks are otherwise only discoverable by guessing wrong. Behind the
+token, like everything else.
+
+An optional `AuditSink` gets exactly one entry per request, refusals included. `AuditEntry`
+**cannot carry arguments**, and that is why it is a type rather than a closure over the frame:
+a tool that takes a secret must be auditable without the audit becoming the place that secret
+gets written down.
+
+```swift
+LoopbackListener(server: server, gate: gate, allowWrites: { … }) { entry in
+  logger.info("\(entry.method ?? "?") \(entry.name ?? "-") \(entry.outcome)")
+}
+```
+
+It tells `writeGateRefused` apart from an ordinary `toolError` — "an agent tried a write while
+the gate was off" is the line worth having. And it keeps two identities apart: `client` is who
+the **token** said this was; `declaredClient` is what the request claimed in `_meta`, which is
+self-reported, trivially forged, and never an input to a decision.
 
 ## The write gate
 
