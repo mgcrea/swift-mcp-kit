@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    # The package's declared floor, and that is the point: building only on the newest
+    # runner would let a macOS 26 symbol through and break the consumers that target lower.
+    # The round-trip suite binds real loopback ports, so this also checks that the socket
+    # setup works on the oldest OS the package claims.
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show toolchain
+        run: swift --version
+      - name: Build
+        run: swift build -v
+      - name: Test
+        run: swift test -v
+      # A gate rather than a suggestion: --strict turns every lint finding into a failure.
+      - name: Lint
+        run: xcrun swift-format lint --strict --recursive Package.swift Sources Tests
