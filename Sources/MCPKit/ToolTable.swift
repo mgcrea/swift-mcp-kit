@@ -60,13 +60,18 @@ public struct ToolTable: Sendable {
   ) async -> ToolResult {
     guard let entry = entries.first(where: { $0.tool.name == name }) else {
       let available = listing(allowWrites: allowWrites).map(\.name).joined(separator: ", ")
-      return .failure(
-        "No tool named '\(name)'. Available: \(available).")
+      return ToolResult(
+        content: [.text("No tool named '\(name)'. Available: \(available).")],
+        isError: true, outcome: .unknownTool)
     }
     guard allowWrites || !entry.tool.mutates else {
-      return .failure(
-        "'\(name)' changes data, and this server's write gate is off. "
-          + "Turn on \"Allow writes\" in the app to use it.")
+      return ToolResult(
+        content: [
+          .text(
+            "'\(name)' changes data, and this server's write gate is off. "
+              + "Turn on \"Allow writes\" in the app to use it.")
+        ],
+        isError: true, outcome: .writeGateRefused)
     }
     do {
       return try await entry.handler(arguments)

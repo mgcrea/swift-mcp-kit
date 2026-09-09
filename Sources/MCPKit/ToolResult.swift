@@ -27,15 +27,22 @@ public struct ToolResult: Sendable, Hashable {
 
   public var content: [Content]
   public var structuredContent: JSONValue?
+  /// What an audit line should say about this. Derived from `isError` unless the table set
+  /// it, which it does for the two refusals worth telling apart from an ordinary failure.
+  public var outcome: AuditOutcome
   /// A tool failure, not a protocol failure. The distinction matters: a model can read and
   /// act on a tool error, whereas a JSON-RPC error is a transport-level event it is only
   /// told about.
   public var isError: Bool
 
-  public init(content: [Content], structuredContent: JSONValue? = nil, isError: Bool = false) {
+  public init(
+    content: [Content], structuredContent: JSONValue? = nil, isError: Bool = false,
+    outcome: AuditOutcome? = nil
+  ) {
     self.content = content
     self.structuredContent = structuredContent
     self.isError = isError
+    self.outcome = outcome ?? (isError ? .toolError : .served)
   }
 
   public static func text(_ value: String) -> ToolResult {

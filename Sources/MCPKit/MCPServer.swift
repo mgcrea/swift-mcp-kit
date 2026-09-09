@@ -24,10 +24,17 @@ public struct MCPResponse: Sendable, Hashable {
   public let httpStatus: Int
   /// `nil` for the `202` a notification gets, which must have no body at all.
   public let body: JSONValue?
+  /// What an audit line should say.
+  ///
+  /// Reported here rather than emitted from inside `MCPServer`, because the only identity
+  /// worth auditing is the one the **token** established, and this type never sees a token.
+  /// The transport composes the entry; this says what happened.
+  public let outcome: AuditOutcome
 
-  public init(httpStatus: Int, body: JSONValue?) {
+  public init(httpStatus: Int, body: JSONValue?, outcome: AuditOutcome = .served) {
     self.httpStatus = httpStatus
     self.body = body
+    self.outcome = outcome
   }
 }
 
@@ -66,7 +73,9 @@ public struct MCPServer: Sendable {
   public func respond(to request: MCPRequest, allowWrites: Bool) async -> MCPResponse {
     // A notification is acknowledged and never answered. Returning a body here would be a
     // JSON-RPC response to something that carried no id to match it against.
-    guard !request.isNotification else { return MCPResponse(httpStatus: 202, body: nil) }
+    guard !request.isNotification else {
+      return MCPResponse(httpStatus: 202, body: nil, outcome: .accepted)
+    }
 
     switch request.method {
     case "server/discover":
@@ -90,7 +99,8 @@ public struct MCPServer: Sendable {
       }
       let result = await tools.call(
         name: name, arguments: request.arguments, allowWrites: allowWrites)
-      return complete(result.json(for: request.version), for: request)
+      return complete(
+        result.json(for: request.version), for: request, outcome: result.outcome)
 
     default:
       return fault(.methodNotFound(request.method, id: request.id))
@@ -132,7 +142,9 @@ public struct MCPServer: Sendable {
   }
 
   /// Wrap a result in the JSON-RPC envelope, adding the era's own fields.
-  private func complete(_ result: JSONValue, for request: MCPRequest) -> MCPResponse {
+  private func complete(
+    _ result: JSONValue, for request: MCPRequest, outcome: AuditOutcome = .served
+  ) -> MCPResponse {
     var payload = result
     if request.version.era == .stateless {
       payload = payload.merging([
@@ -142,10 +154,12 @@ public struct MCPServer: Sendable {
     }
     return MCPResponse(
       httpStatus: 200,
-      body: .object(["jsonrpc": "2.0", "id": request.id ?? .null, "result": payload]))
+      body: .object(["jsonrpc": "2.0", "id": request.id ?? .null, "result": payload]),
+      outcome: outcome)
   }
 
   private func fault(_ fault: MCPFault) -> MCPResponse {
-    MCPResponse(httpStatus: fault.httpStatus, body: fault.frame)
+    MCPResponse(
+      httpStatus: fault.httpStatus, body: fault.frame, outcome: .protocolError(fault.code))
   }
 }
