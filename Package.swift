@@ -3,7 +3,7 @@ import PackageDescription
 
 // An MCP server that runs *inside* a Mac or iOS app, on the loopback interface.
 //
-// Three products, deliberately split, on the same rule `swift-support-kit` splits by:
+// Four products, deliberately split, on the same rule `swift-support-kit` splits by:
 //
 //   MCPKit           The protocol. Foundation only — no sockets, no SwiftUI, no Security.
 //                    Every rule in the specification is a pure function over a frame here,
@@ -12,6 +12,9 @@ import PackageDescription
 //   MCPKitLoopback   The listener: a POSIX socket on 127.0.0.1, a hand-written HTTP/1.1
 //                    parser, the Host/Origin/bearer checks and the Keychain token.
 //   MCPKitUI         The settings panel every consuming app otherwise builds again.
+//   MCPKitWiring     Writing the server into the MCP clients on this Mac: their config
+//                    files, merged or spliced so nothing else in them moves. It depends on
+//                    nothing here, because it never talks to the server — it describes one.
 //
 // Why this is not part of `swift-support-kit`: that package CANNOT open a connection, and
 // that is a requirement rather than a coincidence — it is what keeps the consuming apps'
@@ -30,12 +33,15 @@ let package = Package(
     .library(name: "MCPKit", targets: ["MCPKit"]),
     .library(name: "MCPKitLoopback", targets: ["MCPKitLoopback"]),
     .library(name: "MCPKitUI", targets: ["MCPKitUI"]),
+    .library(name: "MCPKitWiring", targets: ["MCPKitWiring"]),
   ],
   targets: [
     .target(name: "MCPKit"),
     .target(name: "MCPKitLoopback", dependencies: ["MCPKit"]),
     .target(name: "MCPKitUI", dependencies: ["MCPKitLoopback"]),
+    .target(name: "MCPKitWiring"),
     .testTarget(name: "MCPKitTests", dependencies: ["MCPKit"]),
     .testTarget(name: "MCPKitLoopbackTests", dependencies: ["MCPKitLoopback"]),
+    .testTarget(name: "MCPKitWiringTests", dependencies: ["MCPKitWiring"]),
   ]
 )

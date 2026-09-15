@@ -56,13 +56,14 @@ listening socket, so it needs its own home rather than a version of that one whi
 gained a network dependency. Same reasoning that produced
 [`swift-cloudflare-kit`](https://github.com/mgcrea/swift-cloudflare-kit).
 
-## The three products
+## The four products
 
 | | |
 | --- | --- |
 | `MCPKit` | The protocol. Foundation only — no sockets, no SwiftUI. Every specification rule is a pure function over a frame, which is what lets the suite run offline on any platform. |
 | `MCPKitLoopback` | The listener: a POSIX socket on `127.0.0.1`, a hand-written HTTP/1.1 parser, the `Host`/`Origin`/bearer checks, and the Keychain token. |
 | `MCPKitUI` | The settings panel every consuming app otherwise builds again. |
+| `MCPKitWiring` | Writing the server into the MCP clients installed on this Mac — Claude Code, ChatGPT & Codex, Cursor, VS Code — so nobody pastes a token into a config by hand. |
 
 ## Security
 
@@ -126,6 +127,38 @@ name it guessed.
 export file is honestly `readOnlyHint: false`, and putting a data-export feature behind a
 safety switch would be the wrong reading of both. The gate governs changes to the user's
 data, preferences and credentials.
+
+## Configuring clients
+
+A server nobody can reach is a switch that does nothing, and reaching this one by hand means
+pasting a port and a bearer token into another application's config file. `MCPKitWiring` does
+that write, and undoes it:
+
+```swift
+let server = WiredServer(key: "almanac", url: "http://127.0.0.1:8788/mcp", token: token)
+let client = WiringClient.claudeCode(configURL: home.appending(path: ".claude.json"))
+
+switch client.status(of: server) {
+case .notConfigured, .stale: try client.configure(server)
+case .taken: break  // somebody else's server is under that key: ask, then configure(force:)
+default: break
+}
+try client.unwire(server)
+```
+
+The files belong to other applications, so every write holds the same rules:
+
+- **Nothing that is not ours moves.** JSON is merged by key; Codex's `config.toml` is spliced
+  line by line and never re-encoded, so its comments and prose survive byte for byte.
+- **Ownership is our key *and* a loopback URL.** Every app on this package serves
+  `http://127.0.0.1:<port>/mcp`, so a rule reading only the URL would let one app's Remove
+  delete another's entry.
+- **A key already holding somebody else's server is refused** unless the caller forces it.
+- **Every write is backed up, atomic, 0600,** refused if the file changed since it was read,
+  and skipped entirely when it would change nothing.
+
+Claude Desktop is not in the catalog: it runs local servers as commands and has no URL entry,
+so reaching it takes a stdio bridge inside the app.
 
 ## Requirements
 
