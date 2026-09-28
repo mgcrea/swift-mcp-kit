@@ -66,19 +66,19 @@ public struct ToolResult: Sendable, Hashable {
 
   /// The `tools/call` result body.
   ///
-  /// `structuredContent` is emitted for every era that reads it. For `2025-06-18`, whose
-  /// clients do not, the serialized JSON is added as a second text block instead — which is
-  /// the one place speaking three revisions pays for itself rather than costing.
+  /// `structuredContent` is emitted for every supported version: it arrived in `2025-06-18`
+  /// together with `outputSchema`, and a client that was shown a schema requires the field.
+  /// For `2025-06-18` the serialized JSON is also added as a second text block, which that
+  /// revision recommends for clients predating the field; the later revisions drop the
+  /// recommendation, and so does this.
   public func json(for version: MCPVersion) -> JSONValue {
     var blocks = content.map(\.json)
-    if let structuredContent {
-      if version == .v20250618 {
-        blocks.append(
-          .object(["type": "text", "text": .string(MCPJSON.string(structuredContent))]))
-      }
+    if let structuredContent, version == .v20250618 {
+      blocks.append(
+        .object(["type": "text", "text": .string(MCPJSON.string(structuredContent))]))
     }
     var fields: JSONValue = .object(["content": .array(blocks), "isError": .bool(isError)])
-    if let structuredContent, version != .v20250618 {
+    if let structuredContent {
       fields = fields.merging(["structuredContent": structuredContent])
     }
     return fields

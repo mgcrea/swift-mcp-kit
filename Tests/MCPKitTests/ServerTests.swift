@@ -140,16 +140,29 @@ struct ServerTests {
     #expect(result["isError"] == .bool(false))
   }
 
-  /// 2025-06-18 clients do not read `structuredContent`, so for them the same data has to
-  /// travel as text or it does not arrive at all.
-  @Test("The oldest era gets the payload serialized as text instead")
-  func oldestEraGetsTextFallback() async throws {
+  /// `structuredContent` arrived in 2025-06-18, alongside `outputSchema`. A client on any
+  /// supported revision that sees an `outputSchema` in `tools/list` requires it on the call:
+  /// the TypeScript SDK 1.30.0 throws "has an output schema but did not return structured
+  /// content" when it is missing.
+  @Test("Every supported version gets structured content", arguments: MCPVersion.allCases)
+  func everyVersionGetsStructured(_ version: MCPVersion) async throws {
+    let response = await server().respond(
+      to: request(
+        "tools/call", version: version, params: ["name": "read_thing", "arguments": [:]]),
+      allowWrites: false)
+    let result = try #require(response.body?["result"])
+    #expect(result["structuredContent"]?["rows"] == .int(1))
+  }
+
+  /// 2025-06-18 says a tool returning structured content SHOULD also return it serialized
+  /// in a text block, for clients that predate the field. The later revisions drop that.
+  @Test("2025-06-18 also gets the payload serialized as text")
+  func oldestEraGetsTextBlockToo() async throws {
     let response = await server().respond(
       to: request(
         "tools/call", version: .v20250618, params: ["name": "read_thing", "arguments": [:]]),
       allowWrites: false)
     let result = try #require(response.body?["result"])
-    #expect(result["structuredContent"] == nil)
     let blocks = try #require(result["content"]?.arrayValue)
     #expect(blocks.count == 2)
     #expect(blocks.last?["text"]?.stringValue?.contains("\"rows\":1") == true)

@@ -45,7 +45,7 @@ newest revision would be correct and unusable at the same time.
 | Negotiation | `initialize` | `initialize` | `server/discover`, per-request `_meta` |
 | Sessions | `Mcp-Session-Id` | `Mcp-Session-Id` | none |
 | Result envelope | plain | plain | `resultType`, `ttlMs`, `cacheScope` |
-| `structuredContent` | not read | read | read |
+| `structuredContent` | read, plus a text copy | read | read |
 
 ## Why this is not part of `swift-support-kit`
 
