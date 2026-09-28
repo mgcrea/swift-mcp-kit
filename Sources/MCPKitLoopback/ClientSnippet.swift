@@ -2,12 +2,14 @@ import Foundation
 
 /// The configuration a person pastes into their editor.
 ///
-/// Three shapes for four clients, which is the actual state of the world rather than an
-/// oversight: the JSON hosts agree, Codex uses TOML, and a stdio-only host cannot use an
-/// HTTP endpoint at all and is told so rather than given something that will not work.
+/// Four shapes, which is the actual state of the world rather than an oversight: Claude Code
+/// takes a command, Claude Desktop and Cursor agree on `mcpServers`, VS Code's `mcp.json`
+/// reads `servers` instead, and Codex uses TOML. The VS Code key is its own case because a
+/// snippet under the wrong key pastes cleanly and configures nothing.
 public enum ClientSnippet: String, Sendable, CaseIterable {
   case claudeCode = "Claude Code"
-  case json = "Claude Desktop / Cursor / VS Code"
+  case json = "Claude Desktop / Cursor"
+  case vscode = "VS Code"
   case codex = "Codex"
 
   public func text(serverName: String, port: Int, token: String) -> String {
@@ -18,10 +20,10 @@ public enum ClientSnippet: String, Sendable, CaseIterable {
         claude mcp add --transport http \(serverName) \(url) \\
           --header "Authorization: Bearer \(token)"
         """
-    case .json:
+    case .json, .vscode:
       return """
         {
-          "mcpServers": {
+          "\(self == .vscode ? "servers" : "mcpServers")": {
             "\(serverName)": {
               "type": "http",
               "url": "\(url)",
