@@ -97,9 +97,11 @@ public enum Dialect {
     }
 
     // A handshake-era client sends `initialize` before it has a negotiated version to put
-    // in a header, so the only statement of intent is in the body.
+    // in a header, so the only statement of intent is in the body. A version this server
+    // does not speak is not refused: the handshake revisions have the server answer with one
+    // it does, and leave the client to decide whether it can carry on.
     if method == "initialize", let asked = params["protocolVersion"]?.stringValue {
-      return known(asked, id: id)
+      return .success(MCPVersion(rawValue: asked) ?? .latestHandshake)
     }
 
     if let headerValue { return known(headerValue, id: id) }

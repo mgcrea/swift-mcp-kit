@@ -93,6 +93,20 @@ struct DialectTests {
     #expect(supported.contains(.string("2025-11-25")))
   }
 
+  /// The handshake revisions say a server that does not support the version `initialize`
+  /// asks for answers with one it does, and the client decides whether to carry on. Refusing
+  /// instead cuts off every client still asking for 2024-11-05 or 2025-03-26, which the
+  /// official SDKs have accepted all along.
+  @Test("An initialize asking for an unknown version is offered the newest handshake one")
+  func unknownInitializeVersionNegotiatesDown() throws {
+    for asked in ["2024-11-05", "2025-03-26", "1999-01-01"] {
+      let (headers, body) = legacyInitialize(version: asked)
+      let request = try Dialect.parse(headers: headers, body: body).get()
+      #expect(request.version == .v20251125)
+      #expect(request.method == "initialize")
+    }
+  }
+
   /// The header and the `_meta` field are two spellings of one fact. When they disagree a
   /// gateway routing on the header and a server executing on the body would act on
   /// different values, which is the vulnerability the rule exists to close.

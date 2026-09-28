@@ -119,8 +119,8 @@ public struct MCPServer: Sendable {
 
   private func initializeResult(for request: MCPRequest) -> JSONValue {
     var fields: [String: JSONValue] = [
-      // Echo what the client asked for. `Dialect` has already refused anything unsupported,
-      // so by here the requested version is one this server speaks.
+      // Echo what the client asked for when this server speaks it. `Dialect` has already
+      // replaced anything else with the newest handshake version, which is the counter-offer.
       "protocolVersion": .string(request.version.rawValue),
       "capabilities": capabilities,
       "serverInfo": info.json,
