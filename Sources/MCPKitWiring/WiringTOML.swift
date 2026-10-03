@@ -88,8 +88,10 @@ public enum WiringTOML {
 
   // MARK: - Reading
 
+  /// An empty read is looked at twice, for the reason `WiringFile.settledContents` gives: an
+  /// empty document spliced and written back would replace the user's whole file.
   public static func read(_ url: URL) throws -> Document {
-    let data = try Data(contentsOf: url)
+    let data = try WiringFile.settledContents(of: url)
     guard let text = String(data: data, encoding: .utf8) else { throw ScanError.notUTF8(url) }
     return try scan(text)
   }
