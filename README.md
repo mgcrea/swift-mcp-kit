@@ -160,6 +160,25 @@ The files belong to other applications, so every write holds the same rules:
 Claude Desktop is not in the catalog: it runs local servers as commands and has no URL entry,
 so reaching it takes a stdio bridge inside the app.
 
+### Handing the server to Bastion
+
+[Bastion](https://bastion.mgcrea.io) can stand in front of a loopback server: the token in its
+Keychain instead of every client's config, each call in its Activity window, and a write switch
+of its own over the tools that change data. `BastionLink` asks it to, with a link rather than a
+file write, so a sandboxed app can do it too:
+
+```swift
+let link = BastionLink(
+  server, displayName: "Pochette", summary: "Tags, renames and organizes music files.",
+  writeTools: ["pochette_edit_tags", "pochette_move_files", "pochette_undo"])
+if BastionLink.installedApplication != nil { try await link.open() }
+```
+
+`open()` opens `bastion://add-server?…` in Bastion itself, found by bundle identifier and never
+by scheme alone, because any app may claim a scheme and this link carries the token. Bastion
+reads it with `BastionLink(link:)`, the same type, shows what it was handed, and adds nothing
+until the person confirms. Only a literal `127.0.0.1` or `[::1]` URL is accepted.
+
 ## Requirements
 
 macOS 15+ / iOS 17+, Swift 6. The floor is what the package needs — a BSD socket,
