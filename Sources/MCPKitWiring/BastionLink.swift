@@ -26,6 +26,9 @@ public struct BastionLink: Hashable, Sendable {
   /// any app may claim the `bastion` scheme, and the link carries a token.
   public static let bundleIdentifiers = ["io.mgcrea.bastion", "io.mgcrea.bastion.debug"]
 
+  /// Where somebody who has not heard of Bastion finds out what it is.
+  public static let website = URL(string: "https://bastion.mgcrea.io")!
+
   /// The server's id in Bastion: kebab case, and part of every tool name a model reads through
   /// it, so the app's short name and nothing more.
   public let id: String

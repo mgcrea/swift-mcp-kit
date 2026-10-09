@@ -38,7 +38,7 @@ let package = Package(
   targets: [
     .target(name: "MCPKit"),
     .target(name: "MCPKitLoopback", dependencies: ["MCPKit"]),
-    .target(name: "MCPKitUI", dependencies: ["MCPKitLoopback"]),
+    .target(name: "MCPKitUI", dependencies: ["MCPKitLoopback", "MCPKitWiring"]),
     .target(name: "MCPKitWiring"),
     .testTarget(name: "MCPKitTests", dependencies: ["MCPKit"]),
     .testTarget(name: "MCPKitLoopbackTests", dependencies: ["MCPKitLoopback"]),

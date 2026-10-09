@@ -62,7 +62,7 @@ gained a network dependency. Same reasoning that produced
 | --- | --- |
 | `MCPKit` | The protocol. Foundation only — no sockets, no SwiftUI. Every specification rule is a pure function over a frame, which is what lets the suite run offline on any platform. |
 | `MCPKitLoopback` | The listener: a POSIX socket on `127.0.0.1`, a hand-written HTTP/1.1 parser, the `Host`/`Origin`/bearer checks, and the Keychain token. |
-| `MCPKitUI` | The settings panel every consuming app otherwise builds again. |
+| `MCPKitUI` | The settings panel every consuming app otherwise builds again, and `BastionRow`. |
 | `MCPKitWiring` | Writing the server into the MCP clients installed on this Mac — Claude Code, ChatGPT & Codex, Cursor, VS Code — so nobody pastes a token into a config by hand. |
 
 ## Security
@@ -178,6 +178,14 @@ if BastionLink.installedApplication != nil { try await link.open() }
 by scheme alone, because any app may claim a scheme and this link carries the token. Bastion
 reads it with `BastionLink(link:)`, the same type, shows what it was handed, and adds nothing
 until the person confirms. Only a literal `127.0.0.1` or `[::1]` URL is accepted.
+
+In a settings form, `MCPKitUI.BastionRow` is the whole row: the button where Bastion is
+installed, and where it is not, a sentence on what Bastion is with a link to its site. The
+closure runs when the button is pressed, so the token is read then:
+
+```swift
+BastionRow { BastionLink(server, displayName: "Pochette", writeTools: Tools.writeTools) }
+```
 
 ## Requirements
 
