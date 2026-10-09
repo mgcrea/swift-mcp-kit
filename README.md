@@ -62,7 +62,7 @@ gained a network dependency. Same reasoning that produced
 | --- | --- |
 | `MCPKit` | The protocol. Foundation only — no sockets, no SwiftUI. Every specification rule is a pure function over a frame, which is what lets the suite run offline on any platform. |
 | `MCPKitLoopback` | The listener: a POSIX socket on `127.0.0.1`, a hand-written HTTP/1.1 parser, the `Host`/`Origin`/bearer checks, and the Keychain token. |
-| `MCPKitUI` | The settings panel every consuming app otherwise builds again, and `BastionRow`. |
+| `MCPKitUI` | The settings panel every consuming app otherwise builds again, `BastionRow`, and a toolbar button with a status light. |
 | `MCPKitWiring` | Writing the server into the MCP clients installed on this Mac — Claude Code, ChatGPT & Codex, Cursor, VS Code — so nobody pastes a token into a config by hand. |
 
 ## Security
@@ -186,6 +186,48 @@ closure runs when the button is pressed, so the token is read then:
 ```swift
 BastionRow { BastionLink(server, displayName: "Pochette", writeTools: Tools.writeTools) }
 ```
+
+### A toolbar button, with a light
+
+A server two levels into Settings is a server nobody finds. `MCPToolbarButton` puts it in the
+window's toolbar, with a light that means the same in every app: none while nothing listens,
+green while the server does, pulsing for a minute after a request, orange when a request was
+turned away for its token (a client set up before a Regenerate), red when the listener failed.
+Its popover holds the switch, the status, and a setup section the app supplies.
+
+There is no connection to call connected: each request stands alone over loopback HTTP. So the
+light reads `MCPActivity`, when a request was last served and last turned away, which the app
+records from its `AuditSink` on the main actor:
+
+```swift
+audit: { [weak self] entry in
+  guard let kind = MCPActivity.Kind(entry.outcome) else { return }
+  let date = Date.now
+  Task { @MainActor in self?.activity.record(kind, at: date) }
+}
+```
+
+A sandboxed app cannot write a client's config, so its setup section is `MCPCopySetup`: a
+client to pick, its configuration to copy with the token, and Add to Bastion. An app that may
+write the configs puts its own client rows there instead. `isAvailable: false` and the
+`unavailable` view are for a server behind a purchase:
+
+```swift
+MCPToolbarButton(
+  isAvailable: pro.isPro, isEnabled: $isEnabled, state: mcp.state, activity: mcp.activity,
+  access: Text("Agents can read and preview, and change nothing."),
+  unavailableSettingsTitle: "See Pro…", openSettings: { /* select the pane, open Settings */ }
+) { port in
+  MCPCopySetup(serverName: "pochette", port: port, token: { mcp.token }) { token in
+    BastionLink(WiredServer(key: "pochette", url: "http://127.0.0.1:\(port)/mcp", token: token),
+      displayName: "Pochette", writeTools: Tools.writeTools)
+  }
+} unavailable: {
+  Text("The MCP server comes with Pro.")
+}
+```
+
+`MCPStatusLabel` is the same status line for a settings form.
 
 ## Requirements
 
