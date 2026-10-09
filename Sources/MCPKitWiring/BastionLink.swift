@@ -1,7 +1,9 @@
 import Foundation
 
-#if canImport(AppKit)
+#if os(macOS)
   import AppKit
+#elseif targetEnvironment(macCatalyst)
+  import UIKit
 #endif
 
 /// Handing a loopback server to Bastion, which then stands in front of it: the token kept in
@@ -146,28 +148,45 @@ public struct BastionLink: Hashable, Sendable {
     return ["127.0.0.1", "::1", "[::1]"].contains(components.host ?? "")
   }
 
-  #if canImport(AppKit)
+  #if os(macOS) || targetEnvironment(macCatalyst)
     /// Where Bastion is installed, the release build before a development one.
     @MainActor
     public static var installedApplication: URL? {
-      bundleIdentifiers.lazy.compactMap {
-        NSWorkspace.shared.urlForApplication(withBundleIdentifier: $0)
-      }.first
+      bundleIdentifiers.lazy.compactMap(Workspace.application(bundleIdentifier:)).first
     }
 
     /// Opens the link in Bastion itself, and only there, which then asks the person before
     /// adding anything. Throws when Bastion is not installed.
     @MainActor
     public func open() async throws {
-      guard let application = Self.installedApplication else {
-        throw CocoaError(
-          .fileNoSuchFile,
-          userInfo: [NSLocalizedDescriptionKey: "Bastion is not installed on this Mac."])
-      }
-      let configuration = NSWorkspace.OpenConfiguration()
-      configuration.activates = true
-      _ = try await NSWorkspace.shared.open(
-        [link], withApplicationAt: application, configuration: configuration)
+      let notInstalled = Self.failure("Bastion is not installed on this Mac.")
+      #if os(macOS)
+        guard let application = Self.installedApplication else { throw notInstalled }
+        let configuration = NSWorkspace.OpenConfiguration()
+        configuration.activates = true
+        _ = try await NSWorkspace.shared.open(
+          [link], withApplicationAt: application, configuration: configuration)
+      #else
+        // UIKit cannot name the app a link opens in: it goes to whichever app claimed the
+        // scheme. So it is opened only when that app is one of Bastion's, since it carries the
+        // token.
+        let installed = Self.bundleIdentifiers.compactMap(Workspace.application(bundleIdentifier:))
+        guard !installed.isEmpty else { throw notInstalled }
+        guard let handler = Workspace.application(toOpen: link),
+          installed.contains(where: { $0.standardizedFileURL == handler.standardizedFileURL })
+        else {
+          throw Self.failure(
+            "Another app on this Mac opens bastion links, so the link, which carries the token, "
+              + "was not opened.")
+        }
+        guard await UIApplication.shared.open(link) else {
+          throw Self.failure("Bastion did not open the link.")
+        }
+      #endif
+    }
+
+    private static func failure(_ message: String) -> CocoaError {
+      CocoaError(.fileNoSuchFile, userInfo: [NSLocalizedDescriptionKey: message])
     }
   #endif
 }

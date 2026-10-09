@@ -1,5 +1,4 @@
-#if canImport(AppKit)
-  import AppKit
+#if os(macOS) || targetEnvironment(macCatalyst)
   import MCPKitLoopback
   import MCPKitWiring
   import SwiftUI
@@ -26,9 +25,13 @@
 
     /// Onto the pasteboard, with the real token.
     @MainActor public func copy(serverName: String, port: Int, token: String) {
-      NSPasteboard.general.clearContents()
-      NSPasteboard.general.setString(
-        text(serverName: serverName, port: port, token: token), forType: .string)
+      let text = text(serverName: serverName, port: port, token: token)
+      #if os(macOS)
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(text, forType: .string)
+      #else
+        UIPasteboard.general.string = text
+      #endif
     }
   }
 
@@ -155,4 +158,10 @@
       }
     }
   }
+#endif
+
+#if os(macOS)
+  import AppKit
+#elseif targetEnvironment(macCatalyst)
+  import UIKit
 #endif

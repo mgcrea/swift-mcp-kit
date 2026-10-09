@@ -234,6 +234,11 @@ MCPToolbarButton(
 macOS 15+ / iOS 17+, Swift 6. The floor is what the package needs — a BSD socket,
 Foundation, and `Security` for the token — not what its consumers target.
 
+Mac Catalyst is supported, toolbar button and Bastion included, for an app that must be
+Catalyst on the Mac (one reading HomeKit, say). Under Catalyst the pasteboard is UIKit's, and
+Bastion is found and its link opened through LaunchServices as on the Mac: the link goes out
+only when the app that claims `bastion://` is Bastion itself, since it carries the token.
+
 ## License
 
 MIT

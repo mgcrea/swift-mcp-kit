@@ -136,7 +136,7 @@ public struct MCPServerPanel: View {
   }
 
   private func copy(_ text: String) {
-    #if canImport(AppKit)
+    #if os(macOS)
       NSPasteboard.general.clearContents()
       NSPasteboard.general.setString(text, forType: .string)
     #elseif canImport(UIKit)
@@ -145,7 +145,7 @@ public struct MCPServerPanel: View {
   }
 }
 
-#if canImport(AppKit)
+#if os(macOS)
   import AppKit
 #elseif canImport(UIKit)
   import UIKit

@@ -1,9 +1,5 @@
 import Foundation
 
-#if canImport(AppKit)
-  import AppKit
-#endif
-
 /// An MCP client installed on this Mac, and the file it keeps its servers in.
 ///
 /// The catalog below is the clients that can reach a loopback URL with a bearer header, which
@@ -64,13 +60,7 @@ public struct WiringClient: Identifiable, Hashable, Sendable {
   /// Deliberately not `which`: an app launched by Finder inherits `PATH=/usr/bin:/bin` and
   /// would miss every Homebrew and npm-global install there is.
   public var isInstalled: Bool {
-    #if canImport(AppKit)
-      if let bundleID,
-        NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) != nil
-      {
-        return true
-      }
-    #endif
+    if let bundleID, Workspace.application(bundleIdentifier: bundleID) != nil { return true }
     let fm = FileManager.default
     if evidence.contains(where: { fm.fileExists(atPath: $0.path) }) { return true }
     // A config file is evidence too: nothing but the client writes one.

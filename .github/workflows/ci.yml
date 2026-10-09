@@ -38,3 +38,15 @@ jobs:
       - uses: actions/checkout@v5
       - name: Lint
         run: xcrun swift-format lint --strict --recursive Package.swift Sources Tests
+
+  # Mac Catalyst is a platform of its own to the compiler: `canImport(AppKit)` is true there
+  # while every AppKit symbol is unavailable, so a fence that builds on the Mac and on iOS can
+  # still break it. `swift build` cannot target it; xcodebuild can.
+  catalyst:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build for Mac Catalyst
+        run: >-
+          xcodebuild build -scheme swift-mcp-kit-Package
+          -destination 'generic/platform=macOS,variant=Mac Catalyst'

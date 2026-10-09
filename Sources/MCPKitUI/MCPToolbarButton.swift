@@ -1,4 +1,4 @@
-#if canImport(AppKit)
+#if os(macOS) || targetEnvironment(macCatalyst)
   import MCPKitLoopback
   import SwiftUI
 

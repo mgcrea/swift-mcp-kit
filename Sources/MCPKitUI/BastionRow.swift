@@ -1,5 +1,4 @@
-#if canImport(AppKit)
-  import AppKit
+#if os(macOS) || targetEnvironment(macCatalyst)
   import MCPKitWiring
   import SwiftUI
 
