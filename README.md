@@ -128,6 +128,19 @@ export file is honestly `readOnlyHint: false`, and putting a data-export feature
 safety switch would be the wrong reading of both. The gate governs changes to the user's
 data, preferences and credentials.
 
+## Images
+
+A tool that draws something hands it back inline: `ToolResult.image(_:data:mimeType:_:)` sends
+a lede, the picture as base64, and the structured data about it. Inline rather than a path,
+because the server lives in an app, and a sandboxed app's container is often where the client
+on the same Mac cannot read; every supported revision takes `image` content.
+
+```swift
+.image("The plot at 1:500.", data: png, mimeType: "image/png", ["metres_per_pixel": 0.25])
+```
+
+Base64 costs a third more than the bytes, so send an image the size it is meant to be seen.
+
 ## Configuring clients
 
 A server nobody can reach is a switch that does nothing, and reaching this one by hand means

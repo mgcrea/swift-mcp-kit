@@ -11,6 +11,13 @@ public struct ToolResult: Sendable, Hashable {
   public enum Content: Sendable, Hashable {
     case text(String)
     case resourceLink(uri: String, name: String, description: String?, mimeType: String?)
+    /// An image, inline and base64-encoded, which every supported revision accepts.
+    ///
+    /// Inline rather than a file path, because the server lives in an app: a sandboxed app
+    /// writes into its own container, which the client on the same Mac often cannot read, and a
+    /// resource link would need a route this listener does not serve. Base64 costs a third more
+    /// than the bytes, so a tool should send an image the size it is meant to be looked at.
+    case image(data: Data, mimeType: String)
 
     var json: JSONValue {
       switch self {
@@ -21,6 +28,12 @@ public struct ToolResult: Sendable, Hashable {
           ["type": "resource_link", "uri": .string(uri), "name": .string(name)]
             .merging(description.map { ["description": JSONValue.string($0)] } ?? [:]) { a, _ in a }
             .merging(mimeType.map { ["mimeType": JSONValue.string($0)] } ?? [:]) { a, _ in a })
+      case .image(let data, let mimeType):
+        .object(
+          [
+            "type": "image", "data": .string(data.base64EncodedString()),
+            "mimeType": .string(mimeType),
+          ])
       }
     }
   }
@@ -52,6 +65,15 @@ public struct ToolResult: Sendable, Hashable {
   /// The ordinary answer: a short lede, and the data.
   public static func answer(_ lede: String, _ structured: JSONValue) -> ToolResult {
     ToolResult(content: [.text(lede)], structuredContent: structured)
+  }
+
+  /// A picture with a short lede, and the data about it: what a tool that draws hands back.
+  public static func image(
+    _ lede: String, data: Data, mimeType: String, _ structured: JSONValue? = nil
+  ) -> ToolResult {
+    ToolResult(
+      content: [.text(lede), .image(data: data, mimeType: mimeType)],
+      structuredContent: structured)
   }
 
   public static func failure(_ message: String) -> ToolResult {
