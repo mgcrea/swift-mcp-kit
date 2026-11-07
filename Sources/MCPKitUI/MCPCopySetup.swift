@@ -54,7 +54,8 @@
 
     /// - Parameters:
     ///   - token: Read on each copy and each Add to Bastion, so either carries the token as it
-    ///     is after a Regenerate. Empty disables Copy.
+    ///     is after a Regenerate. Empty, the keychain refused it: Copy and Add to Bastion are
+    ///     off, and a line under them says why.
     ///   - bastion: The link handed to Bastion, made with the token just read.
     public init(
       serverName: String, port: Int, token: @escaping () -> String,
@@ -67,6 +68,8 @@
     }
 
     public var body: some View {
+      // Read once a drawing: a refused read costs a trip to the keychain each time.
+      let isTokenMissing = token().isEmpty
       VStack(alignment: .leading, spacing: 12) {
         row("Set up in") {
           HStack(spacing: 8) {
@@ -86,7 +89,7 @@
             .labelStyle(.iconOnly)
             .contentTransition(.symbolEffect(.replace))
             .help("Copy the configuration for \(snippet.setupName), with its token")
-            .disabled(token().isEmpty)
+            .disabled(isTokenMissing)
             .task(id: copied) {
               guard copied else { return }
               try? await Task.sleep(for: .seconds(2))
@@ -94,10 +97,25 @@
             }
           }
           caption(snippet.setupHint)
+          // Otherwise the button is just grey. Seen in a Debug build rebuilt while it ran: the
+          // keychain no longer matches the running code to the bundle on disk, refuses it
+          // without asking, and does until the app starts again.
+          if isTokenMissing {
+            Text(
+              LocalizedStringKey(
+                "The keychain won't give the app its token, so there is nothing to copy. "
+                  + "Quit and reopen the app, and allow it if the keychain asks.")
+            )
+            .font(.caption)
+            .foregroundStyle(.red)
+            .fixedSize(horizontal: false, vertical: true)
+          }
         }
         row("Bastion") {
           if isBastionInstalled {
+            // An empty token would set Bastion up with a server that turns it away.
             Button("Add to Bastion…", action: addToBastion)
+              .disabled(isTokenMissing)
           } else {
             Link("Get Bastion", destination: BastionLink.website)
           }
