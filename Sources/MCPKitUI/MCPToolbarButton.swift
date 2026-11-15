@@ -16,7 +16,10 @@
   /// the server (not bought, say), `status` is the line under the switch while it is on
   /// (`MCPStatusLabel` unless the app words its own), and `openSettings` turns Settings to the
   /// right pane.
-  public struct MCPToolbarButton<Setup: View, Unavailable: View, Status: View>: View {
+  ///
+  /// The status is held as an `AnyView`, not as a third type parameter, so that an app which
+  /// spells the type out (`MCPToolbarButton<MCPCopySetup, EmptyView>`) still compiles.
+  public struct MCPToolbarButton<Setup: View, Unavailable: View>: View {
     private let isAvailable: Bool
     @Binding private var isEnabled: Bool
     private let state: LoopbackListener.State
@@ -26,7 +29,7 @@
     private let openSettings: () -> Void
     private let setup: (Int) -> Setup
     private let unavailable: () -> Unavailable
-    private let statusView: (MCPStatus) -> Status
+    private let statusView: (MCPStatus) -> AnyView
 
     @State private var isPresented = false
 
@@ -37,9 +40,10 @@
     ///     available, such as "See Pro…"; `openSettings` runs either way.
     ///   - status: The server's state in the app's own words, drawn under the switch while it
     ///     is on, for an app whose server does not behave as `MCPStatusLabel` says (it starts
-    ///     before any window, say) or whose words are its own. Handed every state, `.off`
-    ///     included, and redrawn as the light is.
-    public init(
+    ///     before any window, say) or whose words are its own. Drawn only while the switch is
+    ///     on, so handed `.starting`, `.listening`, `.working`, `.turnedAway` or `.failed`,
+    ///     never `.off` or `.unavailable`; redrawn as the light is.
+    public init<Status: View>(
       isAvailable: Bool = true, isEnabled: Binding<Bool>, state: LoopbackListener.State,
       activity: MCPActivity, access: Text? = nil,
       unavailableSettingsTitle: LocalizedStringKey = "Settings…",
@@ -57,7 +61,7 @@
       self.openSettings = openSettings
       self.setup = setup
       self.unavailable = unavailable
-      self.statusView = status
+      self.statusView = { AnyView(status($0)) }
     }
 
     public var body: some View {
@@ -136,7 +140,7 @@
     }
   }
 
-  extension MCPToolbarButton where Status == MCPStatusLabel {
+  extension MCPToolbarButton {
     /// With the kit's status line, `MCPStatusLabel`.
     public init(
       isAvailable: Bool = true, isEnabled: Binding<Bool>, state: LoopbackListener.State,
@@ -157,7 +161,7 @@
 
   extension MCPToolbarButton where Unavailable == EmptyView {
     /// For an app that offers the server to everybody, and words its status itself.
-    public init(
+    public init<Status: View>(
       isEnabled: Binding<Bool>, state: LoopbackListener.State, activity: MCPActivity,
       access: Text? = nil, openSettings: @escaping () -> Void,
       @ViewBuilder status: @escaping (MCPStatus) -> Status,
@@ -168,9 +172,7 @@
         access: access, openSettings: openSettings, status: status, setup: setup,
         unavailable: { EmptyView() })
     }
-  }
 
-  extension MCPToolbarButton where Unavailable == EmptyView, Status == MCPStatusLabel {
     /// For an app that offers the server to everybody.
     public init(
       isEnabled: Binding<Bool>, state: LoopbackListener.State, activity: MCPActivity,

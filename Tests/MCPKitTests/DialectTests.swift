@@ -263,7 +263,32 @@ extension DialectTests {
       Issue.record("A frame a hundred thousand deep was accepted.")
       return
     }
+    // The scan's sentence, not Foundation's: its parser refuses past 512 on its own.
+    #expect(fault.message.contains("deeper than \(Dialect.maximumDepth)"))
+  }
+
+  /// `JSONDecoder` reads UTF-16 too, where an escaped quote's zero byte ends the escape early
+  /// for a scan reading UTF-8, which then takes the brackets after it for text: this body
+  /// went past the scan 400 deep and crashed a connection thread.
+  @Test("A body in UTF-16, with or without a byte order mark, is refused", arguments: [false, true])
+  func utf16Refused(withMark: Bool) {
+    let deep = String(repeating: "[", count: 400) + String(repeating: "]", count: 400)
+    let text = #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"x":["\"","#
+      + deep + "]}}"
+    var body = Data(withMark ? [0xFF, 0xFE] : [])
+    body.append(text.data(using: .utf16LittleEndian)!)
+    guard case .failure(let fault) = Dialect.parse(headers: HTTPHeaders([:]), body: body) else {
+      Issue.record("A UTF-16 body was accepted.")
+      return
+    }
     #expect(fault.code == .parseError)
+    #expect(fault.message.contains("not UTF-8"))
+  }
+
+  @Test("A stray close does not hide the opens after it")
+  func strayCloseCounted() {
+    let body = Data(("]]]]" + String(repeating: "[", count: Dialect.maximumDepth + 1)).utf8)
+    #expect(Dialect.nests(body, deeperThan: Dialect.maximumDepth))
   }
 
   @Test("Brackets inside a string, escaped quotes among them, are not nesting")
@@ -277,15 +302,25 @@ extension DialectTests {
   }
 
   /// The listener parses on a connection thread of 512 KB, and the decode recurses: the
-  /// deepest frame let through must fit there, or the limit protects nothing. A frame that
-  /// did not would crash this test's process rather than fail it.
-  @Test("A frame nested to the limit parses on a connection thread's stack")
-  func nestedToTheLimitOnAConnectionThread() async {
-    let (headers, body) = nested(arrays: Dialect.maximumDepth - 2)
+  /// deepest frame let through must fit there, or the limit protects nothing, and so must its
+  /// encoding, since the answer is encoded on the same thread and a tool may echo what it was
+  /// given. Arrays and objects both, objects costing more. A frame that did not fit would
+  /// crash this test's process rather than fail it.
+  @Test("A frame nested to the limit parses and encodes on a connection thread's stack",
+    arguments: ["[", #"{"k":"#])
+  func nestedToTheLimitOnAConnectionThread(open: String) async {
+    let close = open == "[" ? "]" : "}"
+    let levels = Dialect.maximumDepth - 2
+    let text = #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"x":"#
+      + String(repeating: open, count: levels) + "1" + String(repeating: close, count: levels)
+      + "}}"
+    let headers = HTTPHeaders([:])
+    let body = Data(text.utf8)
     let parsed = await withCheckedContinuation { continuation in
       let thread = Thread {
-        let result = Dialect.parse(headers: headers, body: body)
-        continuation.resume(returning: (try? result.get()) != nil)
+        let request = try? Dialect.parse(headers: headers, body: body).get()
+        let encoded = request.flatMap { try? JSONEncoder().encode($0.params) }
+        continuation.resume(returning: encoded != nil)
       }
       thread.stackSize = 512 * 1024
       thread.start()

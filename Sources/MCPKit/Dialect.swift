@@ -32,6 +32,13 @@ public enum Dialect {
   /// validation rules apply at all depends on the era — requiring `Mcp-Method` of a
   /// handshake-era client would refuse every real client shipping today.
   public static func parse(headers: HTTPHeaders, body: Data) -> Result<MCPRequest, MCPFault> {
+    // Before the depth, which is measured on UTF-8: `JSONDecoder` also reads UTF-16 and
+    // UTF-32, where a quote's zero byte would end an escape early and turn the scan's idea of
+    // what is inside a string inside out, hiding every bracket after it. Those encodings put a
+    // zero byte beside every ASCII character, and UTF-8 JSON never holds one.
+    guard !body.contains(0) else {
+      return .failure(.parseError("the request is not UTF-8."))
+    }
     guard !nests(body, deeperThan: maximumDepth) else {
       return .failure(.parseError("the request nests deeper than \(maximumDepth) levels."))
     }
@@ -94,8 +101,10 @@ public enum Dialect {
   /// Whether `body` opens more than `limit` arrays and objects inside each other.
   ///
   /// A scan of the bytes, never a recursion, so measuring the depth that is refused cannot
-  /// itself run out of stack. A bracket inside a string is text. A malformed body may be
-  /// measured wrong, which is harmless: the decoder refuses it next.
+  /// itself run out of stack. A bracket inside a string is text. The body is read as UTF-8,
+  /// which `parse` has made sure of. A malformed body may be measured wrong, which
+  /// is harmless: Foundation's parser reads the whole text, and refuses it, before the
+  /// recursive decode begins.
   static func nests(_ body: Data, deeperThan limit: Int) -> Bool {
     var depth = 0
     var inString = false
@@ -116,7 +125,9 @@ public enum Dialect {
       case UInt8(ascii: "["), UInt8(ascii: "{"):
         depth += 1
         if depth > limit { return true }
-      case UInt8(ascii: "]"), UInt8(ascii: "}"): depth -= 1
+      case UInt8(ascii: "]"), UInt8(ascii: "}"):
+        // Never below zero, so a stray close cannot hide as many opens after it.
+        depth = max(depth - 1, 0)
       default: break
       }
     }

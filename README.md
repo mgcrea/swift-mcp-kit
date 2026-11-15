@@ -94,7 +94,9 @@ Four further decisions worth knowing about:
   client hunting for the deprecated HTTP+SSE endpoint instead of telling it the truth.
 - **A body nested more than 64 deep is a parse error** (`Dialect.maximumDepth`), measured by a
   scan of its bytes before anything decodes it. The decode recurses on a connection thread of
-  512 KB, and a body about 300 deep ran it out of stack and took the app with it.
+  512 KB, and a body about 300 deep ran it out of stack and took the app with it. A body that
+  is not UTF-8 (one holding a zero byte, as UTF-16 and UTF-32 always do) is refused first,
+  since the scan reads UTF-8 and the decoder would read the others.
 
 ## `GET /health` and the audit line
 
