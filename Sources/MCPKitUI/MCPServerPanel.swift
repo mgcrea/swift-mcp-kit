@@ -46,7 +46,7 @@ public struct MCPServerPanel: View {
       Toggle("MCP server", isOn: $isEnabled)
       Text(
         "Lets an AI agent on this Mac read \(serverName)'s data. It listens on 127.0.0.1 "
-          + "only — nothing is reachable from another machine, and nothing leaves this one."
+          + "only: nothing is reachable from another machine, and nothing leaves this one."
       )
       .font(.caption)
       .foregroundStyle(.secondary)

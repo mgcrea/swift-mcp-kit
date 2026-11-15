@@ -46,6 +46,7 @@
     private let port: Int
     private let token: () -> String
     private let bastion: @MainActor (_ token: String) -> BastionLink
+    private let hint: @MainActor (ClientSnippet) -> Text
 
     @State private var snippet: ClientSnippet = .claudeCode
     @State private var copied = false
@@ -57,14 +58,18 @@
     ///     is after a Regenerate. Empty, the keychain refused it: Copy and Add to Bastion are
     ///     off, and a line under them says why.
     ///   - bastion: The link handed to Bastion, made with the token just read.
+    ///   - hint: Where the copied text goes, under the picker: `setupHint` unless the app
+    ///     words it itself, so its settings and this popover say the same in its language.
     public init(
       serverName: String, port: Int, token: @escaping () -> String,
-      bastion: @escaping @MainActor (_ token: String) -> BastionLink
+      bastion: @escaping @MainActor (_ token: String) -> BastionLink,
+      hint: @escaping @MainActor (ClientSnippet) -> Text = { Text($0.setupHint) }
     ) {
       self.serverName = serverName
       self.port = port
       self.token = token
       self.bastion = bastion
+      self.hint = hint
     }
 
     public var body: some View {
@@ -96,7 +101,7 @@
               copied = false
             }
           }
-          caption(snippet.setupHint)
+          caption(hint(snippet))
           // Otherwise the button is just grey. Seen in a Debug build rebuilt while it ran: the
           // keychain no longer matches the running code to the bundle on disk, refuses it
           // without asking, and does until the app starts again.
@@ -157,7 +162,11 @@
     }
 
     private func caption(_ text: LocalizedStringKey) -> some View {
-      Text(text)
+      caption(Text(text))
+    }
+
+    private func caption(_ text: Text) -> some View {
+      text
         .font(.caption)
         .foregroundStyle(.secondary)
         .fixedSize(horizontal: false, vertical: true)

@@ -27,6 +27,20 @@ public struct ToolTable: Sendable {
   /// dictionary's order would quietly defeat both.
   private var entries: [Entry] = []
 
+  /// What a call to a gated tool is told while writes are off, given the tool's name.
+  ///
+  /// The kit's sentence sends the person to "the app", the one place it can name without
+  /// knowing which app it is in; an app that knows where its switch is (Settings › MCP Server
+  /// › Allow writes) says so here, in its own words and language.
+  public var writeGateRefusal: @Sendable (_ toolName: String) -> String =
+    ToolTable.defaultWriteGateRefusal
+
+  /// The kit's sentence for a write refused at the gate.
+  public static let defaultWriteGateRefusal: @Sendable (_ toolName: String) -> String = {
+    "'\($0)' changes data, and this server's write gate is off. "
+      + "Turn on \"Allow writes\" in the app to use it."
+  }
+
   public init() {}
 
   public mutating func add(_ tool: MCPTool, handler: @escaping ToolHandler) {
@@ -66,12 +80,7 @@ public struct ToolTable: Sendable {
     }
     guard allowWrites || !entry.tool.mutates else {
       return ToolResult(
-        content: [
-          .text(
-            "'\(name)' changes data, and this server's write gate is off. "
-              + "Turn on \"Allow writes\" in the app to use it.")
-        ],
-        isError: true, outcome: .writeGateRefused)
+        content: [.text(writeGateRefusal(name))], isError: true, outcome: .writeGateRefused)
     }
     do {
       return try await entry.handler(arguments)

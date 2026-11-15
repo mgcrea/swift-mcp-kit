@@ -84,7 +84,7 @@ Checks run in this order, and the order is the property rather than the tidiness
 Reversing 1 and 3 would turn the refusal into a measurement: a rebinding probe would learn
 from the status code whether the token it guessed was valid.
 
-Three further decisions worth knowing about:
+Four further decisions worth knowing about:
 
 - **A locked Keychain is `503`, never `401`.** "I cannot tell" is a different answer from
   "no", and collapsing them tells a correctly-configured user their credential is bad.
@@ -92,6 +92,9 @@ Three further decisions worth knowing about:
   them would confirm a guess was well-formed, which is halfway to right.
 - **`GET` and `DELETE` on the endpoint answer `405`, not `404`.** A `404` sends an older
   client hunting for the deprecated HTTP+SSE endpoint instead of telling it the truth.
+- **A body nested more than 64 deep is a parse error** (`Dialect.maximumDepth`), measured by a
+  scan of its bytes before anything decodes it. The decode recurses on a connection thread of
+  512 KB, and a body about 300 deep ran it out of stack and took the app with it.
 
 ## `GET /health` and the audit line
 
@@ -127,6 +130,15 @@ name it guessed.
 export file is honestly `readOnlyHint: false`, and putting a data-export feature behind a
 safety switch would be the wrong reading of both. The gate governs changes to the user's
 data, preferences and credentials.
+
+The refusal tells the agent to turn on "Allow writes" in the app. An app that knows where its
+switch is says so in its own words with `ToolTable.writeGateRefusal`:
+
+```swift
+tools.writeGateRefusal = { name in
+  String(localized: "'\(name)' changes a document. Turn on Allow writes in Settings › MCP Server.")
+}
+```
 
 ## Images
 
@@ -241,6 +253,26 @@ MCPToolbarButton(
 ```
 
 `MCPStatusLabel` is the same status line for a settings form.
+
+The popover's words are the kit's English, and the app's catalog can translate the ones drawn
+from a `LocalizedStringKey`. Two places say more than English can fix, so an app may word them
+itself: `status:` draws the line under the switch in place of `MCPStatusLabel`, whose
+`.starting` says the server starts with the app's window, and `MCPCopySetup`'s `hint:` says
+where each client's copied text goes in place of `setupHint`:
+
+```swift
+MCPToolbarButton(
+  isEnabled: $isEnabled, state: mcp.state, activity: mcp.activity, openSettings: showSettings
+) { status in
+  ServerStatusLine(status: status)  // the app's own view
+} setup: { port in
+  MCPCopySetup(serverName: "maquette", port: port, token: { mcp.token }) { token in
+    MCPSetup.bastionLink(port: port, token: token)
+  } hint: { snippet in
+    Text(Wording.setupHint(snippet))
+  }
+}
+```
 
 ## Requirements
 

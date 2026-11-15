@@ -107,7 +107,7 @@ public final class LoopbackListener: @unchecked Sendable {
     guard bound == 0 else {
       close(fd)
       return fail(
-        "Port \(port) is not available. Another app may be using it — try a different port.")
+        "Port \(port) is not available. Another app may be using it: try a different port.")
     }
     guard listen(fd, 32) == 0 else {
       close(fd)

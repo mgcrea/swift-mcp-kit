@@ -51,6 +51,16 @@ struct ToolTableTests {
     #expect(result.text.contains("Allow writes"))
   }
 
+  @Test("The gate's refusal is the app's sentence when it gives one, the call refused still")
+  func gateRefusalInTheAppsWords() async {
+    var table = table()
+    table.writeGateRefusal = { "\($0): turn on Allow writes in Settings › MCP Server." }
+    let result = await table.call(name: "write_thing", arguments: .object([:]), allowWrites: false)
+    #expect(result.isError)
+    #expect(result.outcome == .writeGateRefused)
+    #expect(result.text == "write_thing: turn on Allow writes in Settings › MCP Server.")
+  }
+
   @Test("A gated tool runs once writes are allowed")
   func gatedToolRuns() async throws {
     let result = try await table().call(
