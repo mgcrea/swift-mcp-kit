@@ -325,4 +325,33 @@ struct RoundTripTests {
       }
     }
   }
+
+  /// The crash the depth limit was added for: a connection thread has 512 KB of stack and the
+  /// decode recurses, so a body about 300 deep took the whole app down. 400, because
+  /// Foundation's parser refuses past 512 on its own and a deeper body never reached the
+  /// recursion; without the limit this test dies of it. Sent as raw bytes.
+  @Test("A request nested four hundred deep is refused, and the server answers the next")
+  func deepRequestRefused() async throws {
+    try await withServer(port: 18_815) { port in
+      let depth = 400
+      let body =
+        #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"x":"#
+        + String(repeating: "[", count: depth) + String(repeating: "]", count: depth) + "}}"
+      var request = URLRequest(url: URL(string: "http://127.0.0.1:\(port)/mcp")!)
+      request.httpMethod = "POST"
+      request.httpBody = Data(body.utf8)
+      request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+      request.setValue("application/json, text/event-stream", forHTTPHeaderField: "Accept")
+      request.setValue("Bearer \(Self.token)", forHTTPHeaderField: "Authorization")
+      let (data, response) = try await URLSession.shared.data(for: request)
+      #expect((response as! HTTPURLResponse).statusCode == 400)
+      let json = try JSONDecoder().decode(JSONValue.self, from: data)
+      #expect(json["error"]?["code"] == .int(MCPErrorCode.parseError.rawValue))
+
+      let (status, _) = try await post(
+        port: port, body: modernFrame(method: "tools/list"),
+        headers: modernHeaders(method: "tools/list"))
+      #expect(status == 200)
+    }
+  }
 }

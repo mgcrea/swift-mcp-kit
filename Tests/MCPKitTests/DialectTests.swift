@@ -224,3 +224,72 @@ extension Result {
     return error
   }
 }
+
+extension DialectTests {
+  // MARK: - Depth
+
+  /// A legacy `initialize` whose params carry `arrays` arrays inside each other, so the frame
+  /// nests `arrays + 2` deep: the frame, its params, then the arrays.
+  private func nested(arrays: Int) -> (HTTPHeaders, Data) {
+    let head = #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"x":"#
+    let body = head + String(repeating: "[", count: arrays) + String(repeating: "]", count: arrays) + "}}"
+    return (HTTPHeaders([:]), Data(body.utf8))
+  }
+
+  @Test("A frame nested to the limit parses")
+  func nestedToTheLimit() throws {
+    let (headers, body) = nested(arrays: Dialect.maximumDepth - 2)
+    let request = try Dialect.parse(headers: headers, body: body).get()
+    #expect(request.method == "initialize")
+  }
+
+  @Test("A frame nested one deeper than the limit is refused as unparseable")
+  func nestedPastTheLimit() {
+    let (headers, body) = nested(arrays: Dialect.maximumDepth - 1)
+    guard case .failure(let fault) = Dialect.parse(headers: headers, body: body) else {
+      Issue.record("A frame past the limit was accepted.")
+      return
+    }
+    #expect(fault.code == .parseError)
+    #expect(fault.httpStatus == 400)
+    #expect(fault.message.contains("deeper than \(Dialect.maximumDepth)"))
+  }
+
+  /// The crash this guards against: about 300 deep ran a connection thread out of stack.
+  @Test("A frame nested a hundred thousand deep is refused, not decoded")
+  func nestedFarPastTheLimit() {
+    let (headers, body) = nested(arrays: 100_000)
+    guard case .failure(let fault) = Dialect.parse(headers: headers, body: body) else {
+      Issue.record("A frame a hundred thousand deep was accepted.")
+      return
+    }
+    #expect(fault.code == .parseError)
+  }
+
+  @Test("Brackets inside a string, escaped quotes among them, are not nesting")
+  func bracketsInStrings() throws {
+    // In the body: \"[ then [{ five hundred times then \\, a quote and a backslash escaped.
+    let text = #"\"["# + String(repeating: "[{", count: 500) + #"\\"#
+    let body = #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"x":""#
+      + text + #""}}"#
+    let request = try Dialect.parse(headers: HTTPHeaders([:]), body: Data(body.utf8)).get()
+    #expect(request.params["x"]?.stringValue?.hasPrefix("\"[[{") == true)
+  }
+
+  /// The listener parses on a connection thread of 512 KB, and the decode recurses: the
+  /// deepest frame let through must fit there, or the limit protects nothing. A frame that
+  /// did not would crash this test's process rather than fail it.
+  @Test("A frame nested to the limit parses on a connection thread's stack")
+  func nestedToTheLimitOnAConnectionThread() async {
+    let (headers, body) = nested(arrays: Dialect.maximumDepth - 2)
+    let parsed = await withCheckedContinuation { continuation in
+      let thread = Thread {
+        let result = Dialect.parse(headers: headers, body: body)
+        continuation.resume(returning: (try? result.get()) != nil)
+      }
+      thread.stackSize = 512 * 1024
+      thread.start()
+    }
+    #expect(parsed)
+  }
+}

@@ -32,6 +32,9 @@ public enum Dialect {
   /// validation rules apply at all depends on the era — requiring `Mcp-Method` of a
   /// handshake-era client would refuse every real client shipping today.
   public static func parse(headers: HTTPHeaders, body: Data) -> Result<MCPRequest, MCPFault> {
+    guard !nests(body, deeperThan: maximumDepth) else {
+      return .failure(.parseError("the request nests deeper than \(maximumDepth) levels."))
+    }
     let frame: JSONValue
     do {
       frame = try JSONDecoder().decode(JSONValue.self, from: body)
@@ -72,6 +75,52 @@ public enum Dialect {
         clientInfo: readClientInfo(params: params, meta: meta),
         clientCapabilities: meta?[MetaKey.clientCapabilities]
           ?? params["capabilities"] ?? .object([:])))
+  }
+
+  // MARK: - Depth
+
+  /// How deep a request may nest, arrays and objects together, the frame itself being one.
+  ///
+  /// `JSONValue` decodes by recursion, many stack frames a level through `Codable`, and the
+  /// listener parses on a connection thread of 512 KB: a body nested about 300 deep ran that
+  /// thread out of stack and took the whole app down before any of its code ran, and anybody
+  /// holding the token could send one. A frame's own fields take three levels and a tool's
+  /// arguments rarely ten, so 64 refuses nothing real and stays far from the stack's end:
+  /// measured on 2026-11-15 in a Debug build, the deepest case, a bare array decoded 200 deep
+  /// on a 512 KB thread and crashed it at 260. Foundation's parser refuses past 512 itself,
+  /// so the danger lay between the two.
+  public static let maximumDepth = 64
+
+  /// Whether `body` opens more than `limit` arrays and objects inside each other.
+  ///
+  /// A scan of the bytes, never a recursion, so measuring the depth that is refused cannot
+  /// itself run out of stack. A bracket inside a string is text. A malformed body may be
+  /// measured wrong, which is harmless: the decoder refuses it next.
+  static func nests(_ body: Data, deeperThan limit: Int) -> Bool {
+    var depth = 0
+    var inString = false
+    var escaped = false
+    for byte in body {
+      if inString {
+        if escaped {
+          escaped = false
+        } else if byte == UInt8(ascii: "\\") {
+          escaped = true
+        } else if byte == UInt8(ascii: "\"") {
+          inString = false
+        }
+        continue
+      }
+      switch byte {
+      case UInt8(ascii: "\""): inString = true
+      case UInt8(ascii: "["), UInt8(ascii: "{"):
+        depth += 1
+        if depth > limit { return true }
+      case UInt8(ascii: "]"), UInt8(ascii: "}"): depth -= 1
+      default: break
+      }
+    }
+    return false
   }
 
   // MARK: - Version
