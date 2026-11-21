@@ -64,13 +64,30 @@ struct CatalogResolutionTests {
     #expect(String(format: germanReads, "Almanac").contains("deine Daten in Almanac zu lesen."))
   }
 
-  /// English is the source language, so it needs no authored entries, but the compiled `en`
-  /// table still has to exist, because it is what an app in none of the shipped languages
-  /// falls back to.
+  /// English is the source language, so it needs no authored entries. Xcode 26's
+  /// `xcstringstool` still writes an `en` table; Xcode 16.4's, on the macos-15 runner, writes
+  /// none for a catalog with no English entries. Either way an app in none of the shipped
+  /// languages reads English, because a lookup with no table returns its key, and every key
+  /// here is its English text. So a missing `en` table is accepted only while no entry gives
+  /// English a value of its own, which is the one case where the key would be wrong.
   @Test("Every shipped language compiles", arguments: CatalogScanner.Module.all)
   func everyLanguageCompiles(module: CatalogScanner.Module) throws {
     let languages = try CompiledCatalog.compiledLanguages(for: module)
-    #expect(languages.contains("en"), "\(module.name) compiled no English table")
+    if !languages.contains("en") {
+      let catalog =
+        try JSONSerialization.jsonObject(
+          with: Data(contentsOf: CatalogScanner.catalogURL(for: module))) as? [String: Any]
+      let strings = catalog?["strings"] as? [String: [String: Any]] ?? [:]
+      let englishValues = strings.filter {
+        ($0.value["localizations"] as? [String: Any])?["en"] != nil
+      }
+      #expect(
+        englishValues.isEmpty,
+        """
+        \(module.name) compiled no English table but gives English its own text for: \
+        \(englishValues.keys.sorted().joined(separator: ", "))
+        """)
+    }
     for language in CatalogScanner.shippedLanguages {
       #expect(languages.contains(language), "\(module.name) compiled no \(language) table")
     }
