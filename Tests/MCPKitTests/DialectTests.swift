@@ -3,6 +3,12 @@ import Testing
 
 @testable import MCPKit
 
+/// The opening of an `initialize` request up to an extra parameter `x`, whose value each
+/// test below writes itself.
+private let initializeHead =
+  #"{"jsonrpc":"2.0","id":1,"method":"initialize","#
+  + #""params":{"protocolVersion":"2025-11-25","capabilities":{},"x":"#
+
 @Suite("Dialect")
 struct DialectTests {
 
@@ -231,8 +237,9 @@ extension DialectTests {
   /// A legacy `initialize` whose params carry `arrays` arrays inside each other, so the frame
   /// nests `arrays + 2` deep: the frame, its params, then the arrays.
   private func nested(arrays: Int) -> (HTTPHeaders, Data) {
-    let head = #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"x":"#
-    let body = head + String(repeating: "[", count: arrays) + String(repeating: "]", count: arrays) + "}}"
+    let head = initializeHead
+    let body =
+      head + String(repeating: "[", count: arrays) + String(repeating: "]", count: arrays) + "}}"
     return (HTTPHeaders([:]), Data(body.utf8))
   }
 
@@ -270,10 +277,12 @@ extension DialectTests {
   /// `JSONDecoder` reads UTF-16 too, where an escaped quote's zero byte ends the escape early
   /// for a scan reading UTF-8, which then takes the brackets after it for text: this body
   /// went past the scan 400 deep and crashed a connection thread.
-  @Test("A body in UTF-16, with or without a byte order mark, is refused", arguments: [false, true])
+  @Test(
+    "A body in UTF-16, with or without a byte order mark, is refused", arguments: [false, true])
   func utf16Refused(withMark: Bool) {
     let deep = String(repeating: "[", count: 400) + String(repeating: "]", count: 400)
-    let text = #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"x":["\"","#
+    let text =
+      initializeHead + #"["\"","#
       + deep + "]}}"
     var body = Data(withMark ? [0xFF, 0xFE] : [])
     body.append(text.data(using: .utf16LittleEndian)!)
@@ -295,7 +304,8 @@ extension DialectTests {
   func bracketsInStrings() throws {
     // In the body: \"[ then [{ five hundred times then \\, a quote and a backslash escaped.
     let text = #"\"["# + String(repeating: "[{", count: 500) + #"\\"#
-    let body = #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"x":""#
+    let body =
+      initializeHead + "\""
       + text + #""}}"#
     let request = try Dialect.parse(headers: HTTPHeaders([:]), body: Data(body.utf8)).get()
     #expect(request.params["x"]?.stringValue?.hasPrefix("\"[[{") == true)
@@ -306,12 +316,14 @@ extension DialectTests {
   /// encoding, since the answer is encoded on the same thread and a tool may echo what it was
   /// given. Arrays and objects both, objects costing more. A frame that did not fit would
   /// crash this test's process rather than fail it.
-  @Test("A frame nested to the limit parses and encodes on a connection thread's stack",
+  @Test(
+    "A frame nested to the limit parses and encodes on a connection thread's stack",
     arguments: ["[", #"{"k":"#])
   func nestedToTheLimitOnAConnectionThread(open: String) async {
     let close = open == "[" ? "]" : "}"
     let levels = Dialect.maximumDepth - 2
-    let text = #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"x":"#
+    let text =
+      initializeHead
       + String(repeating: open, count: levels) + "1" + String(repeating: close, count: levels)
       + "}}"
     let headers = HTTPHeaders([:])

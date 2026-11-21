@@ -148,9 +148,7 @@ struct WiringFileTests {
   func rereadsEmptyJSON() throws {
     let url = try scratchDirectory().appending(path: "config.json")
     try Data().write(to: url)
-    DispatchQueue.global().asyncAfter(deadline: .now() + 0.05) {
-      try? Data(#"{"theirs":1}"#.utf8).write(to: url)
-    }
+    writeSoon(Data(#"{"theirs":1}"#.utf8), to: url)
     #expect(try WiringFile.readJSON(url)["theirs"] as? Int == 1)
   }
 
@@ -165,9 +163,22 @@ struct WiringFileTests {
   func rereadsEmptyTOML() throws {
     let url = try scratchDirectory().appending(path: "config.toml")
     try Data().write(to: url)
-    DispatchQueue.global().asyncAfter(deadline: .now() + 0.05) {
-      try? Data("model = \"theirs\"\n".utf8).write(to: url)
-    }
+    writeSoon(Data("model = \"theirs\"\n".utf8), to: url)
     #expect(try WiringTOML.read(url).text == "model = \"theirs\"\n")
   }
+}
+
+/// Writes `data` to `url` 50 ms from now, well inside the reader's one 250 ms second look.
+///
+/// On a thread of its own rather than `DispatchQueue.global().asyncAfter`: on CI's
+/// three-core runners, with the parallel suites holding the global queue's threads in
+/// `Thread.sleep`, the dispatched write landed after the second look on every run since
+/// 2026-10-09, on both macos-15 and macos-latest, and the two tests failed every time.
+private func writeSoon(_ data: Data, to url: URL) {
+  let thread = Thread {
+    Thread.sleep(forTimeInterval: 0.05)
+    try? data.write(to: url)
+  }
+  thread.qualityOfService = .userInitiated
+  thread.start()
 }
