@@ -37,7 +37,10 @@
     ///   - access: A line under the status on what an agent may do, which the app words for
     ///     its own data and its write switch.
     ///   - unavailableSettingsTitle: The footer button's title while the server is not
-    ///     available, such as "See Pro…"; `openSettings` runs either way.
+    ///     available, such as "See Pro…"; `openSettings` runs either way. The app's key, looked
+    ///     up in its catalog. The default is the kit's "Settings…", already translated from
+    ///     its own catalog and handed over as a key the app's catalog does not hold, so it
+    ///     draws as it is.
     ///   - status: The server's state in the app's own words, drawn under the switch while it
     ///     is on, for an app whose server does not behave as `MCPStatusLabel` says (it starts
     ///     before any window, say) or whose words are its own. Drawn only while the switch is
@@ -46,7 +49,7 @@
     public init<Status: View>(
       isAvailable: Bool = true, isEnabled: Binding<Bool>, state: LoopbackListener.State,
       activity: MCPActivity, access: Text? = nil,
-      unavailableSettingsTitle: LocalizedStringKey = "Settings…",
+      unavailableSettingsTitle: LocalizedStringKey = LocalizedStringKey(localized("Settings…")),
       openSettings: @escaping () -> Void,
       @ViewBuilder status: @escaping (MCPStatus) -> Status,
       @ViewBuilder setup: @escaping (_ port: Int) -> Setup,
@@ -74,7 +77,7 @@
           isPresented.toggle()
         } label: {
           Label {
-            Text("MCP Server")
+            Text(localized("MCP Server"))
           } icon: {
             Image(systemName: "point.3.connected.trianglepath.dotted")
               .overlay(alignment: .bottomTrailing) { light(status) }
@@ -104,11 +107,11 @@
         HStack(alignment: .firstTextBaseline, spacing: 8) {
           Image(systemName: "point.3.connected.trianglepath.dotted")
             .foregroundStyle(.secondary)
-          Text("MCP Server")
+          Text(localized("MCP Server"))
             .font(.headline)
         }
         if isAvailable {
-          Toggle("Run the MCP server", isOn: $isEnabled)
+          Toggle(localized("Run the MCP server"), isOn: $isEnabled)
             .toggleStyle(.switch)
           if isEnabled {
             statusView(status)
@@ -129,9 +132,16 @@
         Divider()
         HStack {
           Spacer()
-          Button(isAvailable ? "MCP Server Settings…" : unavailableSettingsTitle) {
+          Button {
             isPresented = false
             openSettings()
+          } label: {
+            // The kit's words, or the app's key in the app's catalog.
+            if isAvailable {
+              Text(localized("MCP Server Settings…"))
+            } else {
+              Text(unavailableSettingsTitle)
+            }
           }
         }
       }
@@ -145,7 +155,7 @@
     public init(
       isAvailable: Bool = true, isEnabled: Binding<Bool>, state: LoopbackListener.State,
       activity: MCPActivity, access: Text? = nil,
-      unavailableSettingsTitle: LocalizedStringKey = "Settings…",
+      unavailableSettingsTitle: LocalizedStringKey = LocalizedStringKey(localized("Settings…")),
       openSettings: @escaping () -> Void,
       @ViewBuilder setup: @escaping (_ port: Int) -> Setup,
       @ViewBuilder unavailable: @escaping () -> Unavailable

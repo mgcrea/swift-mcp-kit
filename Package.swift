@@ -26,8 +26,21 @@ import PackageDescription
 // Foundation, and (in Loopback) Security for the token. The apps consuming it today all
 // target macOS 26, and a floor raised to match them would lock out other consumers for no
 // gain.
+//
+// `defaultLocalization` is what gives `Bundle.module` a localization table at all, and it names
+// the language the source is written in. `MCPKitUI` owns a `Resources/Localizable.xcstrings`,
+// because a bare `Text("…")` inside a package resolves against `Bundle.main`, the host app's
+// bundle, finds no entry there, and draws the English key to a French user with no build error
+// and no crash. Every string it draws goes through `localized(_:)`, which names `.module`, and
+// `MCPKitUILocalizationTests` holds the catalog to the call sites, as swift-support-kit does.
+//
+// The other three have no catalog. What they say is mostly read by an agent (a fault, the
+// write gate's refusal) or written into a file (a client's config). The exception is the few
+// failures `MCPKitUI` shows as they come, the listener's and the Bastion link's, which are
+// still English.
 let package = Package(
   name: "swift-mcp-kit",
+  defaultLocalization: "en",
   platforms: [.macOS(.v15), .iOS(.v17)],
   products: [
     .library(name: "MCPKit", targets: ["MCPKit"]),
@@ -38,10 +51,17 @@ let package = Package(
   targets: [
     .target(name: "MCPKit"),
     .target(name: "MCPKitLoopback", dependencies: ["MCPKit"]),
-    .target(name: "MCPKitUI", dependencies: ["MCPKitLoopback", "MCPKitWiring"]),
+    .target(
+      name: "MCPKitUI",
+      dependencies: ["MCPKitLoopback", "MCPKitWiring"],
+      resources: [.process("Resources")]
+    ),
     .target(name: "MCPKitWiring"),
     .testTarget(name: "MCPKitTests", dependencies: ["MCPKit"]),
     .testTarget(name: "MCPKitLoopbackTests", dependencies: ["MCPKitLoopback"]),
     .testTarget(name: "MCPKitWiringTests", dependencies: ["MCPKitWiring"]),
+    // Depends on no module: it reads the sources and the catalog off disk, so a lookup that
+    // happens to resolve at runtime for the wrong reason cannot fool it.
+    .testTarget(name: "MCPKitUILocalizationTests"),
   ]
 )

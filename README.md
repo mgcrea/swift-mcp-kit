@@ -256,9 +256,9 @@ MCPToolbarButton(
 
 `MCPStatusLabel` is the same status line for a settings form.
 
-The popover's words are the kit's English, and the app's catalog can translate the ones drawn
-from a `LocalizedStringKey`. Two places say more than English can fix, so an app may word them
-itself: `status:` draws the line under the switch in place of `MCPStatusLabel`, whose
+The popover's words are the kit's, translated in its own catalog (see
+[Localization](#localization)). Two places say more than a translation can fix, so an app may
+word them itself: `status:` draws the line under the switch in place of `MCPStatusLabel`, whose
 `.starting` says the server starts with the app's window, and `MCPCopySetup`'s `hint:` says
 where each client's copied text goes in place of `setupHint`:
 
@@ -275,6 +275,44 @@ MCPToolbarButton(
   }
 }
 ```
+
+## Localization
+
+`MCPKitUI` ships its own strings in English, French, German, Italian and Spanish, in
+`Sources/MCPKitUI/Resources/Localizable.xcstrings`. Which language shows follows **the app's**
+language, not the Mac's: an English-only app on a French Mac stays English throughout, and an app
+translated into one of those languages gets the panel, the toolbar button and its popover in it,
+beside its own screens. An app that ships a language the kit lacks shows the kit's words in
+English inside its translated window.
+
+Two kinds of text, two catalogs:
+
+- **What the kit says** — the status lines, "Allow writes", the setup hints, "Add to Bastion…",
+  `MCPStatus.summary` — lives in the kit's catalog and is looked up with `bundle: .module`. The
+  app has nothing to add.
+- **What the app says** — `access:`, `unavailableSettingsTitle:`, the `status:`, `hint:` and
+  `unavailable` views — is a `LocalizedStringKey` or a view of its own, resolved in the app's
+  catalog like any other string it writes. Where such a parameter has a default, the default is
+  the kit's word already translated, handed over as a key the app's catalog does not hold, so it
+  draws as it is.
+
+Names and paths are not translated: Bastion, Claude Code, Codex, Cursor, VS Code, MCP,
+`~/.codex/config.toml`, `127.0.0.1`. Nor is anything that leaves the app: the configuration
+`MCPCopySetup` copies, what an agent is told, what `MCPKitWiring` writes. Two failures `MCPKitUI`
+shows as they come are still English: the listener's (`LoopbackListener.State.failed`) and
+Bastion link's.
+
+Every lookup goes through `localized(_:)` rather than a bare `Text("…")`, because a literal inside
+a package resolves against `Bundle.main` and silently draws English. That hides the literal from
+Xcode's extractor, so `MCPKitUILocalizationTests` does the extractor's job: every call site has an
+entry, every entry has a call site, every shipped language is complete, no literal reaches SwiftUI
+unwrapped, no entry generates a Swift symbol (Xcode 26 turns "MCP Server" and "MCP server" into
+one, which breaks every app linking the module while `swift build` stays green), and the catalog
+compiles with `xcstringstool` into every language. Each translation also keeps its key's format
+specifiers, names and paths.
+
+Adding a string means adding its French, German, Italian and Spanish in the same commit
+(`CatalogScanner.shippedLanguages`).
 
 ## Requirements
 

@@ -13,16 +13,17 @@ extension MCPStatus {
     }
   }
 
-  /// A tooltip's worth, and what VoiceOver reads as the button's value.
+  /// A tooltip's worth, and what VoiceOver reads as the button's value, in the kit's own
+  /// translation: an app's catalog never held these, since a `String` is drawn as it is.
   public var summary: String {
     switch self {
-    case .unavailable: "Let an AI agent on this Mac reach your data"
-    case .off: "The MCP server is off"
-    case .starting: "The MCP server is starting"
-    case .listening: "The MCP server is listening"
-    case .working: "An agent is using the MCP server"
-    case .turnedAway: "An agent was turned away for its token"
-    case .failed: "The MCP server could not start"
+    case .unavailable: localized("Let an AI agent on this Mac reach your data")
+    case .off: localized("The MCP server is off")
+    case .starting: localized("The MCP server is starting")
+    case .listening: localized("The MCP server is listening")
+    case .working: localized("An agent is using the MCP server")
+    case .turnedAway: localized("An agent was turned away for its token")
+    case .failed: localized("The MCP server could not start")
     }
   }
 }
@@ -44,16 +45,14 @@ public struct MCPStatusLabel: View {
       case .unavailable, .off:
         EmptyView()
       case .starting:
-        Label("Not running. It starts with the app's window.", systemImage: "circle")
+        Label(localized("Not running. It starts with the app's window."), systemImage: "circle")
           .foregroundStyle(.secondary)
       case .listening(let port), .working(let port), .turnedAway(let port):
-        // `String(port)`: an interpolated `Int` in a `LocalizedStringKey` is grouped by the
-        // locale, and 8791 would read "8 791".
-        Label("Listening on 127.0.0.1:\(String(port))", systemImage: "checkmark.circle.fill")
+        Label(listeningLine(port: port), systemImage: "checkmark.circle.fill")
           .foregroundStyle(.green)
         if case .turnedAway = status {
           Label(
-            "An agent was turned away for its token. Copy its configuration again.",
+            localized("An agent was turned away for its token. Copy its configuration again."),
             systemImage: "exclamationmark.triangle.fill"
           )
           .font(.caption)
@@ -74,10 +73,12 @@ public struct MCPStatusLabel: View {
     TimelineView(.periodic(from: .now, by: 10)) { _ in
       Group {
         if let served = activity.lastServed {
-          Text(
-            "Last request from an agent: \(served.formatted(.relative(presentation: .named)))")
+          // Formatted first: a key's interpolation must not nest a call, or the catalog
+          // checks cannot match it to its entry.
+          let when = served.formatted(.relative(presentation: .named))
+          Text(localized("Last request from an agent: \(when)"))
         } else {
-          Text("No request from an agent yet.")
+          Text(localized("No request from an agent yet."))
         }
       }
       .font(.caption)

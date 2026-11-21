@@ -1,0 +1,1326 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "A command. Paste it into Terminal.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Befehl. Füge ihn im Terminal ein."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un comando. Pégalo en Terminal."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une commande. Collez-la dans Terminal."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un comando. Incollalo in Terminale."
+          }
+        }
+      }
+    },
+    "A menu bar app that keeps the token in your Keychain and logs every call.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine Menüleisten-App, die das Token in deinem Schlüsselbund aufbewahrt und jeden Aufruf protokolliert."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una app de la barra de menús que guarda el token en tu Llavero y registra cada llamada."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une app de la barre des menus qui conserve le jeton dans votre Trousseau et journalise chaque appel."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un’app della barra dei menu che conserva il token nel tuo Portachiavi e registra ogni chiamata."
+          }
+        }
+      }
+    },
+    "A table for ~/.codex/config.toml.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine Tabelle für ~/.codex/config.toml."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una tabla para ~/.codex/config.toml."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une table pour ~/.codex/config.toml."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una tabella per ~/.codex/config.toml."
+          }
+        }
+      }
+    },
+    "Add to Bastion…": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zu Bastion hinzufügen …"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir a Bastion…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter à Bastion…"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aggiungi a Bastion…"
+          }
+        }
+      }
+    },
+    "Allow writes": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schreibzugriff erlauben"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permitir cambios"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autoriser l’écriture"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consenti modifiche"
+          }
+        }
+      }
+    },
+    "An agent is using the MCP server": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Agent verwendet den MCP-Server"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un agente está usando el servidor MCP"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un agent utilise le serveur MCP"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un agente sta usando il server MCP"
+          }
+        }
+      }
+    },
+    "An agent was turned away for its token": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Agent wurde wegen seines Tokens abgewiesen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se rechazó a un agente por su token"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un agent a été refusé à cause de son jeton"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un agente è stato respinto per il suo token"
+          }
+        }
+      }
+    },
+    "An agent was turned away for its token. Copy its configuration again.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Agent wurde wegen seines Tokens abgewiesen. Kopiere seine Konfiguration erneut."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se rechazó a un agente por su token. Vuelve a copiar su configuración."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un agent a été refusé à cause de son jeton. Copiez de nouveau sa configuration."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un agente è stato respinto per il suo token. Copia di nuovo la sua configurazione."
+          }
+        }
+      }
+    },
+    "Bastion is a menu bar app that stands in front of your MCP servers: the tokens in your Keychain instead of in every client's config, every call logged, and writes behind a switch of its own.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bastion ist eine Menüleisten-App, die vor deinen MCP-Servern steht: die Tokens in deinem Schlüsselbund statt in der Konfiguration jedes Clients, jeder Aufruf protokolliert und Schreibzugriffe hinter einem eigenen Schalter."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bastion es una app de la barra de menús que se sitúa delante de tus servidores MCP: los tokens en tu Llavero en lugar de en la configuración de cada cliente, cada llamada registrada y los cambios tras un interruptor propio."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bastion est une app de la barre des menus placée devant vos serveurs MCP : les jetons dans votre Trousseau plutôt que dans la configuration de chaque client, chaque appel journalisé, et l’écriture soumise à son propre interrupteur."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bastion è un’app della barra dei menu che si pone davanti ai tuoi server MCP: i token nel tuo Portachiavi invece che nella configurazione di ogni client, ogni chiamata registrata e le modifiche dietro un proprio interruttore."
+          }
+        }
+      }
+    },
+    "Copied": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopiert"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copié"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiato"
+          }
+        }
+      }
+    },
+    "Copy": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopieren"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copier"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copia"
+          }
+        }
+      }
+    },
+    "Copy Configuration": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Konfiguration kopieren"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiar configuración"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copier la configuration"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copia configurazione"
+          }
+        }
+      }
+    },
+    "Copy the configuration for %@, with its token": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Konfiguration für %@ samt Token kopieren"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiar la configuración para %@, con su token"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copier la configuration pour %@, avec son jeton"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copia la configurazione per %@, con il relativo token"
+          }
+        }
+      }
+    },
+    "For the mcp.json that MCP: Open User Configuration opens.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Für die mcp.json, die der Befehl „MCP: Open User Configuration“ öffnet."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Para el archivo mcp.json que abre el comando “MCP: Open User Configuration”."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pour le fichier mcp.json qu’ouvre la commande « MCP: Open User Configuration »."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Per il file mcp.json che apre il comando “MCP: Open User Configuration”."
+          }
+        }
+      }
+    },
+    "For ~/.cursor/mcp.json, beside any servers already there.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Für ~/.cursor/mcp.json, neben den Servern, die dort schon stehen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Para ~/.cursor/mcp.json, junto a los servidores que ya haya."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pour ~/.cursor/mcp.json, à côté des serveurs déjà présents."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Per ~/.cursor/mcp.json, accanto ai server già presenti."
+          }
+        }
+      }
+    },
+    "Get Bastion": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bastion laden"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obtener Bastion"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obtenir Bastion"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ottieni Bastion"
+          }
+        }
+      }
+    },
+    "Hands this server to Bastion, which asks before adding it. Bastion keeps the token in your Keychain, logs every call, and holds writes behind a switch of its own.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Übergibt diesen Server an Bastion, das vor dem Hinzufügen nachfragt. Bastion bewahrt das Token in deinem Schlüsselbund auf, protokolliert jeden Aufruf und stellt Schreibzugriffe hinter einen eigenen Schalter."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pasa este servidor a Bastion, que pregunta antes de añadirlo. Bastion guarda el token en tu Llavero, registra cada llamada y pone los cambios tras un interruptor propio."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confie ce serveur à Bastion, qui demande confirmation avant de l’ajouter. Bastion conserve le jeton dans votre Trousseau, journalise chaque appel et soumet l’écriture à son propre interrupteur."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Affida questo server a Bastion, che chiede conferma prima di aggiungerlo. Bastion conserva il token nel tuo Portachiavi, registra ogni chiamata e mette le modifiche dietro un proprio interruttore."
+          }
+        }
+      }
+    },
+    "Hide": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verbergen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ocultar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Masquer"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nascondi"
+          }
+        }
+      }
+    },
+    "Keeps the token in your Keychain and logs every call. It asks before adding the server.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bewahrt das Token in deinem Schlüsselbund auf und protokolliert jeden Aufruf. Fragt nach, bevor der Server hinzugefügt wird."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guarda el token en tu Llavero y registra cada llamada. Pregunta antes de añadir el servidor."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conserve le jeton dans votre Trousseau et journalise chaque appel. Demande confirmation avant d’ajouter le serveur."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conserva il token nel tuo Portachiavi e registra ogni chiamata. Chiede conferma prima di aggiungere il server."
+          }
+        }
+      }
+    },
+    "Last request from an agent: %@": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Letzte Anfrage eines Agenten: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Última solicitud de un agente: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dernière requête d’un agent : %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ultima richiesta di un agente: %@"
+          }
+        }
+      }
+    },
+    "Let an AI agent on this Mac reach your data": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einem KI-Agenten auf diesem Mac Zugriff auf deine Daten geben"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permitir que un agente de IA de este Mac acceda a tus datos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permettre à un agent IA sur ce Mac d’accéder à vos données"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consenti a un agente IA su questo Mac di accedere ai tuoi dati"
+          }
+        }
+      }
+    },
+    "Lets an AI agent on this Mac read %@'s data. It listens on 127.0.0.1 only: nothing is reachable from another machine, and nothing leaves this one.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erlaubt einem KI-Agenten auf diesem Mac, deine Daten in %@ zu lesen. Der Server ist nur unter 127.0.0.1 erreichbar: Kein anderer Rechner kommt an ihn heran, und nichts verlässt diesen Mac."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permite que un agente de IA de este Mac lea tus datos en %@. Solo escucha en 127.0.0.1: nada es accesible desde otro equipo y nada sale de este."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permet à un agent IA sur ce Mac de lire vos données dans %@. Il écoute uniquement sur 127.0.0.1 : rien n’est accessible depuis une autre machine, et rien ne quitte celle-ci."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consente a un agente IA su questo Mac di leggere i tuoi dati in %@. È in ascolto solo su 127.0.0.1: niente è raggiungibile da un altro computer e niente esce da questo."
+          }
+        }
+      }
+    },
+    "Listening on 127.0.0.1:%@": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erreichbar unter 127.0.0.1:%@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escuchando en 127.0.0.1:%@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À l’écoute sur 127.0.0.1:%@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In ascolto su 127.0.0.1:%@"
+          }
+        }
+      }
+    },
+    "MCP Server": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MCP-Server"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servidor MCP"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Serveur MCP"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server MCP"
+          }
+        }
+      }
+    },
+    "MCP Server Settings…": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MCP-Server-Einstellungen …"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajustes del servidor MCP…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réglages du serveur MCP…"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impostazioni server MCP…"
+          }
+        }
+      }
+    },
+    "MCP server": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MCP-Server"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servidor MCP"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Serveur MCP"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server MCP"
+          }
+        }
+      }
+    },
+    "No request from an agent yet.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch keine Anfrage von einem Agenten."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún no hay solicitudes de agentes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune requête d’agent pour l’instant."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ancora nessuna richiesta da un agente."
+          }
+        }
+      }
+    },
+    "Not running": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht aktiv"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detenido"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arrêté"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non attivo"
+          }
+        }
+      }
+    },
+    "Not running. It starts with the app's window.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht aktiv. Er startet mit dem Fenster der App."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detenido. Se inicia con la ventana de la app."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arrêté. Il démarre avec la fenêtre de l’app."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non attivo. Si avvia con la finestra dell’app."
+          }
+        }
+      }
+    },
+    "Off, an agent can only read. On, it can also change your data and preferences in %@. Writing an export file is not covered by this switch.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aus: Ein Agent kann nur lesen. Ein: Er kann außerdem deine Daten und Einstellungen in %@ ändern. Das Schreiben einer Exportdatei hängt nicht von diesem Schalter ab."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desactivado, un agente solo puede leer. Activado, también puede cambiar tus datos y preferencias en %@. Escribir un archivo de exportación no depende de este interruptor."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Désactivé, un agent peut seulement lire. Activé, il peut aussi modifier vos données et vos préférences dans %@. L’écriture d’un fichier d’exportation ne dépend pas de ce réglage."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se disattivato, un agente può solo leggere. Se attivato, può anche modificare i tuoi dati e le tue preferenze in %@. La scrittura di un file di esportazione non dipende da questo interruttore."
+          }
+        }
+      }
+    },
+    "Port": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Port"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Puerto"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Port"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Porta"
+          }
+        }
+      }
+    },
+    "Regenerate": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neu erzeugen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regenerar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Régénérer"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rigenera"
+          }
+        }
+      }
+    },
+    "Regenerating stops any agent still using the old token.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„Neu erzeugen“ sperrt jeden Agenten aus, der noch das alte Token verwendet."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Al regenerarlo, deja de funcionar cualquier agente que aún use el token anterior."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Régénérer bloque tout agent qui utilise encore l’ancien jeton."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La rigenerazione blocca ogni agente che usa ancora il vecchio token."
+          }
+        }
+      }
+    },
+    "Reveal": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anzeigen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostra"
+          }
+        }
+      }
+    },
+    "Run the MCP server": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MCP-Server ausführen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activar el servidor MCP"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activer le serveur MCP"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attiva il server MCP"
+          }
+        }
+      }
+    },
+    "Set up in": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einrichten in"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configurar en"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configurer dans"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configura in"
+          }
+        }
+      }
+    },
+    "Settings…": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einstellungen …"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajustes…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réglages…"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impostazioni…"
+          }
+        }
+      }
+    },
+    "The MCP server could not start": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der MCP-Server konnte nicht starten"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El servidor MCP no se pudo iniciar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le serveur MCP n’a pas pu démarrer"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il server MCP non è riuscito ad avviarsi"
+          }
+        }
+      }
+    },
+    "The MCP server is listening": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der MCP-Server ist erreichbar"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El servidor MCP está escuchando"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le serveur MCP est à l’écoute"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il server MCP è in ascolto"
+          }
+        }
+      }
+    },
+    "The MCP server is off": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der MCP-Server ist aus"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El servidor MCP está desactivado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le serveur MCP est désactivé"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il server MCP è disattivato"
+          }
+        }
+      }
+    },
+    "The MCP server is starting": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der MCP-Server startet"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El servidor MCP se está iniciando"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le serveur MCP démarre"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il server MCP si sta avviando"
+          }
+        }
+      }
+    },
+    "The keychain won't give the app its token, so there is nothing to copy. Quit and reopen the app, and allow it if the keychain asks.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Schlüsselbund gibt der App ihr Token nicht, daher gibt es nichts zu kopieren. Beende die App, öffne sie erneut und erlaube den Zugriff, wenn der Schlüsselbund fragt."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El llavero no le da a la app su token, así que no hay nada que copiar. Cierra y vuelve a abrir la app, y permite el acceso si el llavero lo pide."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le trousseau ne donne pas son jeton à l’app, il n’y a donc rien à copier. Quittez et rouvrez l’app, puis autorisez-la si le trousseau le demande."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il portachiavi non fornisce il token all’app, quindi non c’è nulla da copiare. Chiudi e riapri l’app, e consenti l’accesso se il portachiavi lo chiede."
+          }
+        }
+      }
+    },
+    "Token": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Token"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Token"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jeton"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Token"
+          }
+        }
+      }
+    },
+    "Turn the server off to change the port.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schalte den Server aus, um den Port zu ändern."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desactiva el servidor para cambiar el puerto."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Désactivez le serveur pour changer de port."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disattiva il server per cambiare la porta."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

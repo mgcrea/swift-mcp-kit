@@ -23,12 +23,15 @@
 
     public var body: some View {
       VStack(alignment: .leading, spacing: 4) {
-        LabeledContent("Bastion") {
+        LabeledContent {
           if isInstalled {
-            Button("Add to Bastion…", action: open)
+            Button(localized("Add to Bastion…"), action: open)
           } else {
-            Link("Get Bastion", destination: BastionLink.website)
+            Link(localized("Get Bastion"), destination: BastionLink.website)
           }
+        } label: {
+          // A name, in every language.
+          Text(verbatim: "Bastion")
         }
         Text(.init(caption))
           .font(.caption)
@@ -46,16 +49,28 @@
       .onAppear { isInstalled = BastionLink.installedApplication != nil }
     }
 
-    /// Markdown, for the link: `Text(LocalizedStringKey)` draws it as one.
+    /// Markdown, for the link: `Text(LocalizedStringKey)` draws it as one. The sentence is
+    /// translated here first, so the key the app's catalog is asked for is already in its
+    /// language and, found nowhere there, draws itself. The link stays out of the sentence:
+    /// an address is not something to translate.
     private var caption: String {
       let site = "[bastion.mgcrea.io](\(BastionLink.website.absoluteString))"
-      return isInstalled
-        ? "Hands this server to Bastion, which asks before adding it. Bastion keeps the token "
-          + "in your Keychain, logs every call, and holds writes behind a switch of its own. "
-          + site
-        : "Bastion is a menu bar app that stands in front of your MCP servers: the tokens in "
-          + "your Keychain instead of in every client's config, every call logged, and writes "
-          + "behind a switch of its own. \(site)"
+      let sentence =
+        isInstalled
+        ? localized(
+          """
+          Hands this server to Bastion, which asks before adding it. Bastion keeps the token \
+          in your Keychain, logs every call, and holds writes behind a switch of its own.
+          """
+        )
+        : localized(
+          """
+          Bastion is a menu bar app that stands in front of your MCP servers: the tokens in \
+          your Keychain instead of in every client's config, every call logged, and writes \
+          behind a switch of its own.
+          """
+        )
+      return sentence + " " + site
     }
 
     private func open() {

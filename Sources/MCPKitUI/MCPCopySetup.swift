@@ -14,13 +14,20 @@
     }
 
     /// Where the copied text goes. A sandboxed app can write none of these files itself.
+    ///
+    /// Still a `LocalizedStringKey`, as in 1.7.0, but made from the kit's own translation: the
+    /// app's catalog is asked for a key already in its language, holds none, and draws it as
+    /// it is. In a language the kit lacks the key is the English, which an app that
+    /// translated it in its own catalog still finds there.
     public var setupHint: LocalizedStringKey {
-      switch self {
-      case .claudeCode: "A command. Paste it into Terminal."
-      case .codex: "A table for ~/.codex/config.toml."
-      case .vscode: "For the mcp.json that MCP: Open User Configuration opens."
-      case .json: "For ~/.cursor/mcp.json, beside any servers already there."
-      }
+      let hint =
+        switch self {
+        case .claudeCode: localized("A command. Paste it into Terminal.")
+        case .codex: localized("A table for ~/.codex/config.toml.")
+        case .vscode: localized("For the mcp.json that MCP: Open User Configuration opens.")
+        case .json: localized("For ~/.cursor/mcp.json, beside any servers already there.")
+        }
+      return LocalizedStringKey(hint)
     }
 
     /// Onto the pasteboard, with the real token.
@@ -76,9 +83,9 @@
       // Read once a drawing: a refused read costs a trip to the keychain each time.
       let isTokenMissing = token().isEmpty
       VStack(alignment: .leading, spacing: 12) {
-        row("Set up in") {
+        row(localized("Set up in")) {
           HStack(spacing: 8) {
-            Picker("Set up in", selection: $snippet) {
+            Picker(localized("Set up in"), selection: $snippet) {
               ForEach(ClientSnippet.setupOrder, id: \.self) { Text($0.setupName).tag($0) }
             }
             .labelsHidden()
@@ -88,12 +95,12 @@
               copied = true
             } label: {
               Label(
-                copied ? "Copied" : "Copy Configuration",
+                copied ? localized("Copied") : localized("Copy Configuration"),
                 systemImage: copied ? "checkmark" : "doc.on.doc")
             }
             .labelStyle(.iconOnly)
             .contentTransition(.symbolEffect(.replace))
-            .help("Copy the configuration for \(snippet.setupName), with its token")
+            .help(localized("Copy the configuration for \(snippet.setupName), with its token"))
             .disabled(isTokenMissing)
             .task(id: copied) {
               guard copied else { return }
@@ -107,30 +114,43 @@
           // without asking, and does until the app starts again.
           if isTokenMissing {
             Text(
-              LocalizedStringKey(
-                "The keychain won't give the app its token, so there is nothing to copy. "
-                  + "Quit and reopen the app, and allow it if the keychain asks.")
+              localized(
+                """
+                The keychain won't give the app its token, so there is nothing to copy. Quit \
+                and reopen the app, and allow it if the keychain asks.
+                """
+              )
             )
             .font(.caption)
             .foregroundStyle(.red)
             .fixedSize(horizontal: false, vertical: true)
           }
         }
+        // A name, in every language.
         row("Bastion") {
           if isBastionInstalled {
             // An empty token would set Bastion up with a server that turns it away.
-            Button("Add to Bastion…", action: addToBastion)
+            Button(localized("Add to Bastion…"), action: addToBastion)
               .disabled(isTokenMissing)
           } else {
-            Link("Get Bastion", destination: BastionLink.website)
+            Link(localized("Get Bastion"), destination: BastionLink.website)
           }
-          // Markdown, for the link, which an interpolated key would draw as plain text.
+          // Markdown, for the link, which an interpolated key would draw as plain text. The
+          // sentence is the kit's translation, so the app's catalog is asked for a key already
+          // in its language, holds none, and draws it as it is, link and all.
+          let sentence =
+            isBastionInstalled
+            ? localized(
+              """
+              Keeps the token in your Keychain and logs every call. It asks before adding the \
+              server.
+              """
+            )
+            : localized("A menu bar app that keeps the token in your Keychain and logs every call.")
           caption(
-            LocalizedStringKey(
-              (isBastionInstalled
-                ? "Keeps the token in your Keychain and logs every call. It asks before adding the server. "
-                : "A menu bar app that keeps the token in your Keychain and logs every call. ")
-                + "[bastion.mgcrea.io](\(BastionLink.website.absoluteString))"))
+            Text(
+              LocalizedStringKey(
+                sentence + " [bastion.mgcrea.io](\(BastionLink.website.absoluteString))")))
           if let bastionError {
             Text(bastionError)
               .font(.caption)
@@ -147,22 +167,20 @@
     /// laid over each other and hidden, so the column is as wide as the longest in any
     /// language, and the second column has the rest: a `Grid` sized that column from the
     /// picker's row and wrapped every caption to it.
+    ///
+    /// The label is a `String` drawn as it is: the caller hands it over translated, or a name.
     private func row(
-      _ label: LocalizedStringKey, @ViewBuilder content: () -> some View
+      _ label: String, @ViewBuilder content: () -> some View
     ) -> some View {
       HStack(alignment: .firstTextBaseline, spacing: 8) {
         ZStack(alignment: .trailing) {
-          Text("Set up in").hidden()
-          Text("Bastion").hidden()
+          Text(localized("Set up in")).hidden()
+          Text(verbatim: "Bastion").hidden()
           Text(label)
         }
         VStack(alignment: .leading, spacing: 4) { content() }
           .frame(maxWidth: .infinity, alignment: .leading)
       }
-    }
-
-    private func caption(_ text: LocalizedStringKey) -> some View {
-      caption(Text(text))
     }
 
     private func caption(_ text: Text) -> some View {

@@ -43,10 +43,18 @@ public struct MCPServerPanel: View {
 
   public var body: some View {
     VStack(alignment: .leading, spacing: 12) {
-      Toggle("MCP server", isOn: $isEnabled)
+      Toggle(localized("MCP server"), isOn: $isEnabled)
+      // One sentence with the app's name as its argument, translated whole. The translations
+      // say "your data in <app>" rather than gluing a possessive or an article to a name they
+      // cannot see: French writes "d'" before a vowel and "de" before the rest, and the catalog
+      // holds one sentence for every app on the kit.
       Text(
-        "Lets an AI agent on this Mac read \(serverName)'s data. It listens on 127.0.0.1 "
-          + "only: nothing is reachable from another machine, and nothing leaves this one."
+        localized(
+          """
+          Lets an AI agent on this Mac read \(serverName)'s data. It listens on 127.0.0.1 \
+          only: nothing is reachable from another machine, and nothing leaves this one.
+          """
+        )
       )
       .font(.caption)
       .foregroundStyle(.secondary)
@@ -54,13 +62,17 @@ public struct MCPServerPanel: View {
       if isEnabled {
         Divider()
         status
-        Toggle("Allow writes", isOn: $allowWrites)
+        Toggle(localized("Allow writes"), isOn: $allowWrites)
         // The precise sentence matters. "Anything that writes" would be wrong — an export
         // writes a file and is never gated — and leaving it vague is how the gate later
         // gets "fixed" into covering things it was never meant to.
         Text(
-          "Off, an agent can only read. On, it can also change your data and preferences "
-            + "in \(serverName). Writing an export file is not covered by this switch."
+          localized(
+            """
+            Off, an agent can only read. On, it can also change your data and preferences \
+            in \(serverName). Writing an export file is not covered by this switch.
+            """
+          )
         )
         .font(.caption)
         .foregroundStyle(.secondary)
@@ -74,11 +86,13 @@ public struct MCPServerPanel: View {
   @ViewBuilder private var status: some View {
     switch state {
     case .running(let boundPort):
-      Label("Listening on 127.0.0.1:\(boundPort)", systemImage: "checkmark.circle.fill")
+      Label(listeningLine(port: boundPort), systemImage: "checkmark.circle.fill")
         .foregroundStyle(.green)
         .font(.callout)
     case .stopped:
-      Label("Not running", systemImage: "circle").foregroundStyle(.secondary).font(.callout)
+      Label(localized("Not running"), systemImage: "circle")
+        .foregroundStyle(.secondary)
+        .font(.callout)
     case .failed(let message):
       Label(message, systemImage: "exclamationmark.triangle.fill")
         .foregroundStyle(.red)
@@ -88,14 +102,14 @@ public struct MCPServerPanel: View {
 
   private var portField: some View {
     HStack {
-      Text("Port")
-      TextField("Port", value: $port, format: .number.grouping(.never))
+      Text(localized("Port"))
+      TextField(localized("Port"), value: $port, format: .number.grouping(.never))
         .frame(width: 80)
         // Changing the port under a live listener would leave clients pointed at a socket
         // that is no longer there, with nothing on screen saying so.
         .disabled(isRunning)
       if isRunning {
-        Text("Turn the server off to change the port.")
+        Text(localized("Turn the server off to change the port."))
           .font(.caption)
           .foregroundStyle(.secondary)
       }
@@ -105,21 +119,21 @@ public struct MCPServerPanel: View {
   private var connection: some View {
     VStack(alignment: .leading, spacing: 8) {
       HStack {
-        Text("Token").font(.callout)
+        Text(localized("Token")).font(.callout)
         Text(tokenRevealed ? token : String(repeating: "•", count: 24))
           .font(.system(.caption, design: .monospaced))
           .textSelection(.enabled)
           .lineLimit(1)
           .truncationMode(.middle)
-        Button(tokenRevealed ? "Hide" : "Reveal") { tokenRevealed.toggle() }
+        Button(tokenRevealed ? localized("Hide") : localized("Reveal")) { tokenRevealed.toggle() }
           .buttonStyle(.borderless)
-        Button("Regenerate", action: regenerateToken).buttonStyle(.borderless)
+        Button(localized("Regenerate"), action: regenerateToken).buttonStyle(.borderless)
       }
-      Text("Regenerating stops any agent still using the old token.")
+      Text(localized("Regenerating stops any agent still using the old token."))
         .font(.caption)
         .foregroundStyle(.secondary)
 
-      Picker("Set up in", selection: $snippet) {
+      Picker(localized("Set up in"), selection: $snippet) {
         ForEach(ClientSnippet.allCases, id: \.self) { Text($0.rawValue).tag($0) }
       }
       if case .running(let boundPort) = state {
@@ -130,7 +144,7 @@ public struct MCPServerPanel: View {
             .textSelection(.enabled)
         }
         .frame(maxHeight: 120)
-        Button("Copy") { copy(text) }.buttonStyle(.borderless)
+        Button(localized("Copy")) { copy(text) }.buttonStyle(.borderless)
       }
     }
   }
